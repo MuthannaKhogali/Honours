@@ -1,3 +1,6 @@
+# Gemini API referenced from: https://ai.google.dev/gemini-api/docs
+# Getting youtube transcript refrenced from: https://www.youtube.com/watch?v=9WrZc0Jy8sA
+
 # imports youtube script api and gemini api
 from youtube_transcript_api import YouTubeTranscriptApi as yta
 import google.generativeai as genai
@@ -6,7 +9,7 @@ import google.generativeai as genai
 genai.configure(api_key="AIzaSyBY9k0tUWzHUF0iH3ARJJUrYRQ_vbniG34")
 
 # sets videoID for the video you want
-vidID = "arj7oStGLkU"
+vidID = ""
 
 # fetches transcript data
 data = yta.get_transcript(vidID)
