@@ -1,5 +1,9 @@
-# imports youtube script api
+# imports youtube script api and gemini api
 from youtube_transcript_api import YouTubeTranscriptApi as yta
+import google.generativeai as genai
+
+# gets my gemini api key
+genai.configure(api_key="AIzaSyBY9k0tUWzHUF0iH3ARJJUrYRQ_vbniG34")
 
 # sets videoID for the video you want
 vidID = "arj7oStGLkU"
@@ -17,6 +21,16 @@ for value in data:
         if key == "text":
             transcript += val + " "
 
-# prints transcript           
-print(transcript)
-        
+# prints transcript to check subtitles if need be          
+# print(transcript)
+
+# pick what model to use
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+# ask gemini question based on the subtitles
+response = model.generate_content("Read these subtitles " + transcript + " Generate me 5 multilpe choice questions on this video" )
+
+# prints response text
+print(response.text)
+
+
