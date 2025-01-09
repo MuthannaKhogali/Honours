@@ -13,7 +13,7 @@
         <button type="submit" class="btn btn-success mt-3">Generate</button>
       </form>
       <div v-if="videoId" class="mt-3">
-        <p>Video ID: {{ videoId }}</p>
+        <p>Video ID:{{ videoId }}</p>
       </div>
     </div>
   </div>
