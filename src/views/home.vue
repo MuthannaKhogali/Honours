@@ -32,11 +32,18 @@
         </form>
       </div>
       <div v-if="questions.length" class="mt-3 text-start">
-        <h4>Questions</h4>
-        <p>{{ questions }}</p>
-      </div>
+        <h4>Questions:</h4>
+        <div v-for="(question, index) in questions" :key="index" class="mb-4">
+          <p>{{ question.question }}</p>
+          <ul>
+            <li v-for="(option, optIndex) in question.options" :key="optIndex">
+              {{ option }}
+            </li>
+          </ul>
+          <p>Answer: {{ question.answer }}</p>
+        </div>
     </div>
-    <p class="position-absolute bottom-0 start-0 ms-3 mb-3 text-muted">Powered by Gemini</p>
+    </div>
 </template>
 
 <script>
@@ -56,7 +63,9 @@ export default {
         const response = await axios.get('http://localhost:3000/generate-questions', {
           params: { videoUrl: this.youtubeLink }
         });
-        this.questions = response.data.questions;
+
+        let cleanedResponse = response.data.questions.replace(/```json|```/g, '').trim();
+        this.questions = JSON.parse(cleanedResponse);
       } catch (error) {
         console.error('Error fetching questions:', error);
       }
