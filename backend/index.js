@@ -1,9 +1,13 @@
 require('dotenv').config(); //gets from env file
 const axios = require('axios'); // for http requests
 const express = require('express'); //for setting up the server
+const cors = require('cors'); // adds cors
 const { getTranscript } = require('youtube-transcript-api'); // imports youtube transcript api
 const app = express();
 const port = 3000; // set port to 3000
+
+// enables cors on all routes
+app.use(cors());
 
 // this functino extracts the transcript from a youtube video
 const getYouTubeTranscript = async (videoUrl) => {
