@@ -12,9 +12,13 @@
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
-    "youtube-transcript": "^1.2.1"
+    "youtube-transcript": "^1.2.1",
+    "youtube-transcript-api": "^1.1.2",
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
