@@ -30,6 +30,7 @@ const generateQuestions = async (transcript) => {
         const response = await axios.post(
             `${process.env.GEMINI_API_URL}?key=${process.env.GEMINI_API_KEY}`, // sends the api key 
             {
+                //prompt to gemini
                 contents: [{ parts: [{ text: `Read these subtitles: ${transcript}. Generate 5 multiple-choice questions. Return the questions as a JSON array where each question has 'question', 'options', and 'answer' keys.
                      I only want you to do this not to say something like "Here is your generated questions"` }] }]
             },

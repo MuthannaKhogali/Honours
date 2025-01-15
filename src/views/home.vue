@@ -31,6 +31,10 @@
           <button type="submit" class="btn btn-success">Generate</button>
         </form>
       </div>
+
+      <!-- Updated Loader -->
+      <div v-if="loading" class="loader"></div>
+
       <div v-if="questions.length" class="mt-3 text-start">
         <h4>Questions:</h4>
         <div v-for="(question, index) in questions" :key="index" class="mb-4">
@@ -54,11 +58,13 @@ export default {
   data() {
     return {
       youtubeLink: "",
-      questions: []
+      questions: [],
+      loading: false // New loading state added
     };
   },
   methods: {
     async fetchQuestions() {
+      this.loading = true; // Start loading
       try {
         const response = await axios.get('http://localhost:3000/generate-questions', {
           params: { videoUrl: this.youtubeLink }
@@ -68,6 +74,8 @@ export default {
         this.questions = JSON.parse(cleanedResponse);
       } catch (error) {
         console.error('Error fetching questions:', error);
+      } finally {
+        this.loading = false; // Stop loading regardless of success or failure
       }
     }
   }
@@ -75,4 +83,19 @@ export default {
 </script>
 
 <style scoped>
+/* Loading circle gotten from: https://www.w3schools.com/howto/howto_css_loader.asp */
+.loader {
+  border: 16px solid #f3f3f3; /* colour of rest of the circle */
+  border-top: 16px solid #008000; /* colour of spinning part */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+  margin: 30px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>
