@@ -48,21 +48,57 @@
 
     <!-- Questions Section -->
     <div v-if="questions.length" class="mt-3 text-start">
-      <h4>Questions:</h4>
-      <div v-if="currentQuestion < questions.length" class="mb-4">
-        <p>{{ questions[currentQuestion].question }}</p>
-        <ul>
-          <li v-for="(option, index) in questions[currentQuestion].options" :key="index">
-            <button class="btn btn-primary m-1" @click="selectAnswer(option)">
+      <!-- Shadow box for displaying questions and results -->
+      <div class="shadow-lg p-4 mb-4 bg-white rounded">
+        <!-- If quiz is not finished, show current question -->
+        <template v-if="!quizFinished">
+          <p>{{ questions[currentQuestion].question }}</p>
+          <div class="d-flex flex-column">
+            <!-- Display answer -->
+            <button 
+              v-for="(option, index) in questions[currentQuestion].options" 
+              :key="index"
+              class="btn m-1 btn-secondary"
+              :class="{
+                'btn-success': answers[currentQuestion] === option && feedback === 'Correct!',
+                'btn-danger': feedback && answers[currentQuestion] === option && feedback !== 'Correct!',
+                'btn-success': feedback !== '' && option === questions[currentQuestion].answer
+              }"
+              :disabled="feedback !== ''"
+              @click="selectAnswer(option)">
               {{ option }}
             </button>
-          </li>
-        </ul>
-        <p v-if="feedback" :class="{'text-success': feedback === 'Correct!', 'text-danger': feedback !== 'Correct!'}">
-          {{ feedback }}
-        </p>
+          </div>
+          <!-- Display feedback -->
+          <p v-if="feedback" :class="{'text-success': feedback === 'Correct!', 'text-danger': feedback !== 'Correct!'}">
+            {{ feedback }}
+          </p>
+        </template>
+
+        <!-- If quiz is finished, display score and answers -->
+        <template v-if="quizFinished">
+          <h2>Quiz Complete!</h2>
+          <h3>Your score: {{ score }} / {{ questions.length }}</h3>
+          <h4>Review your answers:</h4>
+          <div v-for="(question, index) in questions" :key="index" class="mb-4">
+            <p><strong>Q{{ index + 1 }}: {{ question.question }}</strong></p>
+            <p><strong>Your Answer:</strong> {{ answers[index] }}</p>
+            <p :class="{'text-success': answers[index] === question.answer, 'text-danger': answers[index] !== question.answer}">
+              <strong>Correct Answer:</strong> {{ question.answer }}
+            </p>
+          </div>
+        </template>
       </div>
-      <p v-else>Quiz Complete!</p>
+
+      <!-- Navigation Buttons -->
+      <div class="d-flex justify-content-between mt-3" v-if="!quizFinished">
+        <button class="btn btn-secondary" @click="prevQuestion" :disabled="currentQuestion === 0">
+          Previous
+        </button>
+        <button class="btn btn-secondary" @click="nextQuestion">
+          {{ currentQuestion === questions.length - 1 ? 'Finish' : 'Next' }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -75,54 +111,84 @@ export default {
   data() {
     return {
       youtubeLink: "",      // holds the YouTube link input
-      questions: [],        // stores generated questions
-      errorMessage: '',     // holds error messages
-      loading: false,       // for loader visibility
-      currentQuestion: 0,   // keeps track of the current question index
-      feedback: ''          // holds feedback for the user's answer
+      questions: [],         // stores generated questions
+      errorMessage: '',      // holds error messages
+      loading: false,        // for loader visibility
+      currentQuestion: 0,    // keeps track of the current question index
+      feedback: '',          // holds feedback for the user's answer
+      score: 0,              // tracks the user's score
+      selectedOption: '',    // stores the current selected option
+      answers: [],           // array to store user's answers
+      quizFinished: false    // tracks if the quiz is finished
     };
   },
   methods: {
-    // fetch questions from the backend
+    // fetches questions from the backend
     async fetchQuestions() {
-      this.loading = true; // show loader
-      this.errorMessage = '';  // clear previous errors
-      this.questions = [];     // clear previous questions
-      this.currentQuestion = 0; // reset question index
-      this.feedback = '';      // clear feedback
+      this.loading = true;
+      this.errorMessage = '';
+      this.questions = [];
+      this.currentQuestion = 0;
+      this.feedback = '';
+      this.score = 0;
+      this.quizFinished = false;
+      this.answers = [];
       try {
         // send GET request to backend with the YouTube link as a parameter
         const response = await axios.get('http://localhost:3000/generate-questions', {
           params: { videoUrl: this.youtubeLink }
         });
 
-        // clean the received JSON data and parse it
+        // clean the received JSON data and 
         let cleanedResponse = response.data.questions.replace(/```json|```/g, '').trim();
         this.questions = JSON.parse(cleanedResponse);
       } catch (error) {
-        // display error message if an error occurred
+        // display error message if an error
         this.errorMessage = error.response?.data?.error || 'An error occurred while generating questions.';
       } finally {
-        this.loading = false; // hide loader
+        this.loading = false;
       }
     },
 
-    // validate the selected answer
-    selectAnswer(selectedOption) {
-  const correctAnswer = this.questions[this.currentQuestion].answer.trim().toLowerCase();
-  const selectedOptionTrimmed = selectedOption.trim().toLowerCase();
-  
-  if (selectedOptionTrimmed === correctAnswer) {
-    this.feedback = 'Correct!';
-  } else {
-    this.feedback = `Wrong! Correct answer is: ${this.questions[this.currentQuestion].answer}`;
+    // handles answer selection and scoring
+    selectAnswer(option) {
+      this.answers[this.currentQuestion] = option;
+      this.selectedOption = option;
+      const correctAnswer = this.questions[this.currentQuestion].answer.trim().toLowerCase();
+      if (option.trim().toLowerCase() === correctAnswer) {
+        this.feedback = 'Correct!';
+        this.score++;
+      } else {
+        this.feedback = 'Incorrect!';
+      }
+    },
+
+    // moves to the next question or finishes the quiz
+    nextQuestion() {
+      if (this.currentQuestion < this.questions.length - 1) {
+        this.currentQuestion++;
+        this.feedback = '';
+        this.selectedOption = this.answers[this.currentQuestion] || '';
+      } else {
+        this.quizFinished = true;
+      }
+    },
+
+    // moves to the previous question
+    prevQuestion() {
+      if (this.currentQuestion > 0) {
+        this.currentQuestion--;
+        this.feedback = '';
+        this.selectedOption = this.answers[this.currentQuestion] || '';
+        if (this.answers[this.currentQuestion]) {
+          const correctAnswer = this.questions[this.currentQuestion].answer.trim().toLowerCase();
+          this.feedback = this.answers[this.currentQuestion].trim().toLowerCase() === correctAnswer
+            ? 'Correct!'
+            : 'Incorrect!';
+        }
+      }
+    }
   }
-  setTimeout(() => {
-    this.currentQuestion++;
-    this.feedback = '';
-  }, 2000);
-  }
-}
 };
 </script>
 
