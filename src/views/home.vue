@@ -46,18 +46,23 @@
     <!-- Error Message -->
     <p v-if="errorMessage" class="text-danger">{{ errorMessage }}</p>
 
-    <!-- Questions -->
+    <!-- Questions Section -->
     <div v-if="questions.length" class="mt-3 text-start">
       <h4>Questions:</h4>
-      <div v-for="(question, index) in questions" :key="index" class="mb-4">
-        <p>{{ question.question }}</p>
+      <div v-if="currentQuestion < questions.length" class="mb-4">
+        <p>{{ questions[currentQuestion].question }}</p>
         <ul>
-          <li v-for="(option, optIndex) in question.options" :key="optIndex">
-            {{ option }}
+          <li v-for="(option, index) in questions[currentQuestion].options" :key="index">
+            <button class="btn btn-primary m-1" @click="selectAnswer(option)">
+              {{ option }}
+            </button>
           </li>
         </ul>
-        <p>Answer: {{ question.answer }}</p>
+        <p v-if="feedback" :class="{'text-success': feedback === 'Correct!', 'text-danger': feedback !== 'Correct!'}">
+          {{ feedback }}
+        </p>
       </div>
+      <p v-else>Quiz Complete!</p>
     </div>
   </div>
 </template>
@@ -72,7 +77,9 @@ export default {
       youtubeLink: "",      // holds the YouTube link input
       questions: [],        // stores generated questions
       errorMessage: '',     // holds error messages
-      loading: false        // for loader visability
+      loading: false,       // for loader visibility
+      currentQuestion: 0,   // keeps track of the current question index
+      feedback: ''          // holds feedback for the user's answer
     };
   },
   methods: {
@@ -80,29 +87,47 @@ export default {
     async fetchQuestions() {
       this.loading = true; // show loader
       this.errorMessage = '';  // clear previous errors
-      this.questions = []; // clear previous questions
+      this.questions = [];     // clear previous questions
+      this.currentQuestion = 0; // reset question index
+      this.feedback = '';      // clear feedback
       try {
         // send GET request to backend with the YouTube link as a parameter
         const response = await axios.get('http://localhost:3000/generate-questions', {
           params: { videoUrl: this.youtubeLink }
         });
 
-        // clean the received JSON data and pass it
+        // clean the received JSON data and parse it
         let cleanedResponse = response.data.questions.replace(/```json|```/g, '').trim();
         this.questions = JSON.parse(cleanedResponse);
       } catch (error) {
-        // display error message if one of the errors occured
+        // display error message if an error occurred
         this.errorMessage = error.response?.data?.error || 'An error occurred while generating questions.';
       } finally {
         this.loading = false; // hide loader
       }
-    }
+    },
+
+    // validate the selected answer
+    selectAnswer(selectedOption) {
+  const correctAnswer = this.questions[this.currentQuestion].answer.trim().toLowerCase();
+  const selectedOptionTrimmed = selectedOption.trim().toLowerCase();
+  
+  if (selectedOptionTrimmed === correctAnswer) {
+    this.feedback = 'Correct!';
+  } else {
+    this.feedback = `Wrong! Correct answer is: ${this.questions[this.currentQuestion].answer}`;
   }
+  setTimeout(() => {
+    this.currentQuestion++;
+    this.feedback = '';
+  }, 2000);
+  }
+}
 };
 </script>
 
 <style scoped>
-/* loader for the spinning circle animation gotten from : https://www.w3schools.com/howto/howto_css_loader.asp */
+/* loader for the spinning circle animation */
 .loader {
   border: 16px solid #f3f3f3; /* border for the circle */
   border-top: 16px solid #008000; /* spinning part */
