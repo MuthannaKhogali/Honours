@@ -37,10 +37,14 @@ const generateQuestions = async (transcript) => {
             `${process.env.GEMINI_API_URL}?key=${process.env.GEMINI_API_KEY}`, // sends the API key along with the request
             {
                 // question to gemini
-                contents: [{ parts: [{ text: `Read these subtitles: ${transcript}. Generate 5 multiple-choice questions. 
-                    Return a JSON list of multiple-choice questions. 
-                    Each question should have a 'question' string, an 'options' array with four choices, 
-                    and an 'answer' string containing the correct choice.` }] }]
+                contents: [{
+                     parts: [{ 
+                        text: `Read these subtitles: ${transcript}. Generate 5 multiple-choice questions. 
+                        Return a JSON list of multiple-choice questions. 
+                        Each question should have a 'question' string, an 'options' array with four full-text answer choices, 
+                        and an 'answer' string containing the exact matching full-text choice from the options array.` 
+                }] 
+            }]
             },
             {
                 headers: { 'Content-Type': 'application/json' } // specifies the request payload format
