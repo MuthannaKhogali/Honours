@@ -60,7 +60,7 @@
               :key="index"
               class="btn m-1 btn-secondary"
               :class="{
-                'btn-dark': answers[currentQuestion] === option && feedback === 'Correct!',
+                'btn-success': answers[currentQuestion] === option && feedback === 'Correct!',
                 'btn-danger': feedback && answers[currentQuestion] === option && feedback !== 'Correct!',
                 'btn-success': feedback !== '' && option === questions[currentQuestion].answer
               }"
