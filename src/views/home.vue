@@ -21,7 +21,7 @@
   <!-- Main Content -->
   <div class="container mt-5 text-center">
     <h1>Video Question Generator</h1>
-    <h6 class="text-muted">Quiz yourself on any YouTube video with VideoToQuestion for free!</h6>
+    <h6 class="text-muted">Quiz yourself on any YouTube video with VideoToQuestion!</h6>
     
     <!-- Link Form -->
     <div class="mb-3 d-flex justify-content-center">
@@ -36,7 +36,7 @@
           placeholder="Enter YouTube link"
           autocomplete="off"
         />
-        <button type="submit" class="btn btn-success">Generate</button>
+        <button type="submit" class="btn btn-dark">Generate</button>
       </form>
     </div>
 
@@ -60,7 +60,7 @@
               :key="index"
               class="btn m-1 btn-secondary"
               :class="{
-                'btn-success': answers[currentQuestion] === option && feedback === 'Correct!',
+                'btn-dark': answers[currentQuestion] === option && feedback === 'Correct!',
                 'btn-danger': feedback && answers[currentQuestion] === option && feedback !== 'Correct!',
                 'btn-success': feedback !== '' && option === questions[currentQuestion].answer
               }"
@@ -193,6 +193,9 @@ export default {
 </script>
 
 <style scoped>
+div {
+  font-family: 'Lato', sans-serif;
+}
 /* loader for the spinning circle animation */
 .loader {
   border: 16px solid #f3f3f3; /* border for the circle */
