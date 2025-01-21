@@ -199,7 +199,7 @@ div {
 /* loader for the spinning circle animation */
 .loader {
   border: 16px solid #f3f3f3; /* border for the circle */
-  border-top: 16px solid #008000; /* spinning part */
+  border-top: 16px solid #000000; /* spinning part */
   border-radius: 50%; /* makes it a circle */
   width: 120px;
   height: 120px;
