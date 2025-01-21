@@ -34,7 +34,7 @@
             <p v-if="errorMessage" class="text-danger">{{ errorMessage }}</p>
   
             <div class="d-grid gap-2">
-              <button type="submit" class="btn btn-primary">Login</button>
+              <button type="submit" class="btn btn-dark">Login</button>
             </div>
           </form>
           
