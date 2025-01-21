@@ -6,7 +6,7 @@ from youtube_transcript_api import YouTubeTranscriptApi as yta
 import google.generativeai as genai
 
 # gets my gemini api key
-genai.configure(api_key="AIzaSyBY9k0tUWzHUF0iH3ARJJUrYRQ_vbniG34")
+genai.configure(api_key="")
 
 # sets videoID for the video you want
 vidID = "WWf3MnQ1SwU&t"
