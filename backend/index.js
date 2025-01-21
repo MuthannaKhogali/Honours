@@ -40,7 +40,10 @@ const generateQuestions = async (transcript) => {
                 contents: [{
                      parts: [{ 
                         text: `Read these subtitles: ${transcript}. Generate 5 multiple-choice questions.
-                        Although these questions SHOULD relate to a video I do not want example questions to be generated.
+                        The first thing you must do is find out what the general topic the video is talking about.
+                        If the person making the video makes an obscure reference or example you must NOT ask about it.
+                        You must also NOT ask questions about background knowledge and must be relevant to the general topic of the video.
+                        Although these questions SHOULD relate to a video I do not want example questions that the video has went over to be generated.
                         If the video goes over an example question or example solution I want you to generate a new question similar to how it was done in the video.
                         Ofcourse this only relates to questions, somethings people want to memorises content from a video.
                         Make your own judgement for now whether to generate example questions that are similar to the video or questions that may test users memory from the video content. 
