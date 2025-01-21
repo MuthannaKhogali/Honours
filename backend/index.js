@@ -39,7 +39,12 @@ const generateQuestions = async (transcript) => {
                 // question to gemini
                 contents: [{
                      parts: [{ 
-                        text: `Read these subtitles: ${transcript}. Generate 5 multiple-choice questions. 
+                        text: `Read these subtitles: ${transcript}. Generate 5 multiple-choice questions.
+                        Although these questions SHOULD relate to a video I do not want example questions to be generated.
+                        If the video goes over an example question or example solution I want you to generate a new question similar to how it was done in the video.
+                        Ofcourse this only relates to questions, somethings people want to memorises content from a video.
+                        Make your own judgement for now whether to generate example questions that are similar to the video or questions that may test users memory from the video content. 
+                        You may also include both type of questions.
                         Return a JSON list of multiple-choice questions. 
                         Each question should have a 'question' string, an 'options' array with four full-text answer choices, 
                         and an 'answer' string containing the exact matching full-text choice from the options array.` 
