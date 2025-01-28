@@ -178,7 +178,7 @@ export default {
     prevQuestion() {
       if (this.currentQuestion > 0) {
         this.currentQuestion--;
-        this.feedback = '';
+        this.feedback = ''; // error maybe here?
         this.selectedOption = this.answers[this.currentQuestion] || '';
         if (this.answers[this.currentQuestion]) {
           const correctAnswer = this.questions[this.currentQuestion].answer.trim().toLowerCase();
@@ -196,7 +196,7 @@ export default {
 div {
   font-family: 'Lato', sans-serif;
 }
-/* loader for the spinning circle animation */
+/* loader for the spinning circle animation taken from w3 school https://www.w3schools.com/howto/howto_css_loader.asp*/
 .loader {
   border: 16px solid #f3f3f3; /* border for the circle */
   border-top: 16px solid #000000; /* spinning part */
