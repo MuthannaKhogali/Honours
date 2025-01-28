@@ -39,7 +39,7 @@ const generateQuestions = async (transcript) => {
                 // question to gemini
                 contents: [{
                      parts: [{ 
-                        text: `Read these subtitles: ${transcript}. Generate 5 multiple-choice questions.
+                        text: `Make sure to read these subtitles: ${transcript}. Generate 5 multiple-choice questions.
                         The first thing you must do is find out what the general topic the video is talking about.
                         If the person making the video makes an obscure reference or example you must NOT ask about it.
                         You must also NOT ask questions about background knowledge and must be relevant to the general topic of the video.
