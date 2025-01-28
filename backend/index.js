@@ -14,7 +14,7 @@ const getYouTubeTranscript = async (videoUrl) => {
     try {
         const videoId = new URL(videoUrl).searchParams.get('v'); // extracts the video ID from the URL
         if (!videoId) {
-            throw new Error('Invalid YouTube link. Please provide a valid URL.');
+            throw new Error('Invalid URL');
         }
         const transcriptData = await getTranscript(videoId); // fetches the transcript using the video ID
         if (!transcriptData.length) {
