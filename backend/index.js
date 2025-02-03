@@ -5,9 +5,12 @@ const cors = require('cors'); // added cors
 const { getTranscript } = require('youtube-transcript-api'); // library for fetching YouTube video transcripts
 const app = express();
 const port = 3000; // port where the server is
+const { registerUser, loginUser } = require('./auth');
 
 // enables CORS for all routes
 app.use(cors());
+app.use(express.json()); // parses incoming JSON requests
+app.use(express.urlencoded({ extended: true }));
 
 // gets the youtube transcript and throws errors depending on what it is
 const getYouTubeTranscript = async (videoUrl) => {
@@ -80,6 +83,9 @@ app.get('/generate-questions', async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 });
+
+app.post('/register', registerUser);
+app.post('/login', loginUser);
 
 // starts the server and listens on the specified port
 app.listen(port, () => {
