@@ -1,13 +1,13 @@
 <template>
   <div class="no-scroll">
-    <div class="purple-box">
+    <div class="purple-box" v-if="!isSmallScreen">
       <h2 class="purple-text">{{ isRegistering ? 'Welcome Aboard' : 'Welcome Back' }}</h2>
       <p class="purple-text">
         {{ isRegistering ? "Already have an account?" : "Don't have an account?" }}
         <a href="#" @click.prevent="toggleMode" class="text-link">{{ isRegistering ? 'Login Now' : 'Register Now' }}</a>
       </p>
     </div>
-    <div class="form-box">
+    <div :class="['form-box', { 'adjust-left': !isSmallScreen }]">
       <h2>{{ isRegistering ? 'Register' : 'Log in' }}</h2>
       <form @submit.prevent="isRegistering ? handleRegister() : handleLogin()">
         <div class="input-group centered-group">
@@ -32,6 +32,10 @@
         <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
           {{ isRegistering ? 'Register' : 'Login' }}
         </button>
+        <p v-if="isSmallScreen" class="mobile-text">
+          {{ isRegistering ? "Already have an account?" : "Don't have an account?" }}
+          <a href="#" @click.prevent="toggleMode" class="text-link">{{ isRegistering ? 'Login Now' : 'Register Now' }}</a>
+        </p>
       </form>
     </div>
   </div>
@@ -47,7 +51,8 @@ export default {
       password: '',
       confirmPassword: '',
       errorMessage: '',
-      isRegistering: false
+      isRegistering: false,
+      isSmallScreen: window.innerWidth <= 1150 || window.innerHeight <= 780
     };
   },
   methods: {
@@ -62,7 +67,7 @@ export default {
           password: this.password
         });
         localStorage.setItem('userID', response.data.userID);
-        this.errorMessage = 'LOG IN SUCCESSFUL';
+        this.errorMessage = 'LOGGED IN';
       } catch (error) {
         this.errorMessage = error.response?.data?.error || 'Login failed.';
       }
@@ -82,7 +87,16 @@ export default {
       } catch (error) {
         this.errorMessage = error.response?.data?.error || 'Registration failed.';
       }
+    },
+    handleResize() {
+      this.isSmallScreen = window.innerWidth <= 1150 || window.innerHeight <= 780;
     }
+  },
+  mounted() {
+    window.addEventListener('resize', this.handleResize);
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.handleResize);
   }
 };
 </script>
@@ -102,7 +116,8 @@ html, body {
   overflow: hidden;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  flex-direction: column;
 }
 .purple-box {
   width: 55vw;
@@ -126,10 +141,19 @@ html, body {
   width: 50vw;
   background: white;
   padding: 50px;
-  border-radius: 40px 40px 40px 40px;
+  border-radius: 40px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   text-align: center;
-  margin-left: 5vw;
+  transition: width 0.3s ease-in-out;
+}
+@media (max-width: 768px) {
+  .form-box {
+    width: 90vw;
+    padding: 30px;
+  }
+}
+.adjust-left {
+  margin-left: -40vw;
 }
 .input-group {
   margin-bottom: 20px;
@@ -144,7 +168,7 @@ html, body {
   width: 100%;
 }
 .text-link {
-  color: white;
+  color: rgb(2, 192, 199);
   text-decoration: underline;
   cursor: pointer;
   margin-left: 5px;
@@ -152,5 +176,8 @@ html, body {
 .text-danger {
   color: red;
   margin-top: 10px;
+}
+.mobile-text {
+  margin-top: 15px;
 }
 </style>
