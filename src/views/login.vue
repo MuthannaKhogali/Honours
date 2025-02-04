@@ -79,7 +79,7 @@ export default {
           password: this.password
         });
         localStorage.setItem('userID', response.data.userID);
-        this.errorMessage = 'LOGGED IN';
+        this.$router.push('/account');
       } catch (error) {
         this.errorMessage = error.response?.data?.error || 'Login failed.';
       }
