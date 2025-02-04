@@ -139,6 +139,7 @@ html, body {
 }
 .form-box {
   width: 50vw;
+
   background: white;
   padding: 50px;
   border-radius: 40px;
@@ -168,10 +169,16 @@ html, body {
   width: 100%;
 }
 .text-link {
-  color: rgb(2, 192, 199);
+  color: white;
   text-decoration: underline;
   cursor: pointer;
   margin-left: 5px;
+  transition: color 0.3s ease-in-out;
+}
+@media (max-width: 1150px) {
+  .text-link {
+    color: rgb(62, 101, 255);
+  }
 }
 .text-danger {
   color: red;
@@ -180,4 +187,14 @@ html, body {
 .mobile-text {
   margin-top: 15px;
 }
+
+button.mdl-button {
+  background-color: rgb(138, 0, 183) !important; 
+  color: white !important;
+}
+
+button.mdl-button:hover {
+  background-color: rgb(115, 0, 152) !important;
+}
+
 </style>
