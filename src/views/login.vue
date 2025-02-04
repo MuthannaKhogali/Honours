@@ -1,5 +1,6 @@
 <template>
   <div class="no-scroll">
+    <!-- Purple Box for Desktop -->
     <div class="purple-box" v-if="!isSmallScreen">
       <h2 class="purple-text">{{ isRegistering ? 'Welcome Aboard' : 'Welcome Back' }}</h2>
       <p class="purple-text">
@@ -7,31 +8,45 @@
         <a href="#" @click.prevent="toggleMode" class="text-link">{{ isRegistering ? 'Login Now' : 'Register Now' }}</a>
       </p>
     </div>
+    
+    <!-- Form Box -->
     <div :class="['form-box', { 'adjust-left': !isSmallScreen }]">
       <h2>{{ isRegistering ? 'Register' : 'Log in' }}</h2>
       <form @submit.prevent="isRegistering ? handleRegister() : handleLogin()">
+        
+        <!-- Username Input Field -->
         <div class="input-group centered-group">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
             <input class="mdl-textfield__input" type="text" v-model="username" required />
             <label class="mdl-textfield__label">Username</label>
           </div>
         </div>
+        
+        <!-- Password Input Field -->
         <div class="input-group centered-group">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
             <input class="mdl-textfield__input" type="password" v-model="password" required />
             <label class="mdl-textfield__label">Password</label>
           </div>
         </div>
+        
+        <!-- Confirm Password Field -->
         <div v-if="isRegistering" class="input-group centered-group">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
             <input class="mdl-textfield__input" type="password" v-model="confirmPassword" required />
             <label class="mdl-textfield__label">Confirm Password</label>
           </div>
         </div>
+        
+        <!-- Error Message -->
         <p v-if="errorMessage" class="text-danger">{{ errorMessage }}</p>
+        
+        <!-- Submit Button -->
         <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
           {{ isRegistering ? 'Register' : 'Login' }}
         </button>
+        
+        <!-- Switch Between Login and Register -->
         <p v-if="isSmallScreen" class="mobile-text">
           {{ isRegistering ? "Already have an account?" : "Don't have an account?" }}
           <a href="#" @click.prevent="toggleMode" class="text-link">{{ isRegistering ? 'Login Now' : 'Register Now' }}</a>
@@ -56,10 +71,13 @@ export default {
     };
   },
   methods: {
+    // toggle between login and register
     toggleMode() {
       this.isRegistering = !this.isRegistering;
       this.errorMessage = '';
     },
+    
+    // handle login request
     async handleLogin() {
       try {
         const response = await axios.post('http://localhost:3000/login', {
@@ -72,6 +90,8 @@ export default {
         this.errorMessage = error.response?.data?.error || 'Login failed.';
       }
     },
+    
+    // handle register request
     async handleRegister() {
       if (this.password !== this.confirmPassword) {
         this.errorMessage = 'Passwords do not match!';
@@ -88,10 +108,14 @@ export default {
         this.errorMessage = error.response?.data?.error || 'Registration failed.';
       }
     },
+    
+    // responsiveness
     handleResize() {
       this.isSmallScreen = window.innerWidth <= 1150 || window.innerHeight <= 780;
     }
   },
+  
+  // event listener for different sized screen
   mounted() {
     window.addEventListener('resize', this.handleResize);
   },
@@ -102,6 +126,7 @@ export default {
 </script>
 
 <style scoped>
+/* General Page Styles */
 html, body {
   overflow: hidden;
   margin: 0;
@@ -119,6 +144,8 @@ html, body {
   justify-content: center;
   flex-direction: column;
 }
+
+/* Purple Box */
 .purple-box {
   width: 55vw;
   height: 100vh;
@@ -134,12 +161,10 @@ html, body {
   position: absolute;
   padding-left: 50px;
 }
-.purple-text {
-  margin-left: 100px;
-}
+
+/* Form Box Styles */
 .form-box {
   width: 50vw;
-
   background: white;
   padding: 50px;
   border-radius: 40px;
@@ -153,14 +178,20 @@ html, body {
     padding: 30px;
   }
 }
+
+/* Move Form Left When Purple Box */
 .adjust-left {
   margin-left: -40vw;
 }
+
+/* Input Field Styles */
 .input-group {
   margin-bottom: 20px;
   display: flex;
   justify-content: center;
 }
+
+/* Centered Form Fields */
 .centered-group {
   display: flex;
   justify-content: center;
@@ -168,6 +199,8 @@ html, body {
   flex-direction: column;
   width: 100%;
 }
+
+/* Text Link Styling */
 .text-link {
   color: white;
   text-decoration: underline;
@@ -180,21 +213,19 @@ html, body {
     color: rgb(62, 101, 255);
   }
 }
+
+/* Error Message */
 .text-danger {
   color: red;
   margin-top: 10px;
 }
-.mobile-text {
-  margin-top: 15px;
-}
 
+/* Button Styling */
 button.mdl-button {
-  background-color: rgb(138, 0, 183) !important; 
+  background-color: rgb(138, 0, 183) !important;
   color: white !important;
 }
-
 button.mdl-button:hover {
   background-color: rgb(115, 0, 152) !important;
 }
-
 </style>
