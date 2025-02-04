@@ -83,4 +83,9 @@ export default {
 .navbar-brand, .nav-link {
     color: white !important;
 }
+
+.custom-input {
+    max-width: 1000px;
+}
+
 </style>
