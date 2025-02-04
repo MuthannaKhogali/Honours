@@ -98,7 +98,7 @@ const loginUser = async (req, res) => {
         }
 
         // if log in successful, return userID
-        res.json({ message: 'Login successful', userID: user.userID });
+        res.json({ message: 'Login successful', userID: user.userID, username: user.username  });
     } catch (error) {
         console.error("Error logging in:", error);
         res.status(500).json({ error: 'Error logging in.' });

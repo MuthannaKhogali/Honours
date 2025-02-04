@@ -78,6 +78,9 @@ export default {
           username: this.username,
           password: this.password
         });
+        if (response.data.username) { 
+            localStorage.setItem('username', response.data.username);
+        }
         localStorage.setItem('userID', response.data.userID);
         this.$router.push('/account');
       } catch (error) {

@@ -11,7 +11,7 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="#">USERNAME</a>
+                            <a class="nav-link" href="#">{{ username }}</a>
                         </li>
                     </ul>
                 </div>
@@ -42,7 +42,21 @@
 </template>
 
 <script>
+export default {
+    data() {
+        return {
+            username: 'USERNAME' // Default value
+        };
+    },
+    mounted() {
+        const storedUsername = localStorage.getItem('username');
+        if (storedUsername) {
+            this.username = storedUsername;
+        }
+    }
+};
 </script>
+
 
 <style scoped>
 .custom-navbar {
@@ -52,6 +66,4 @@
 .navbar-brand, .nav-link {
     color: white !important;
 }
-
-
 </style>
