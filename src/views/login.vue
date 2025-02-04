@@ -11,7 +11,7 @@
 
     <!-- Form Box -->
     <div :class="['form-box', { 'adjust-left': !isSmallScreen }]">
-      <h2 class="text-start mb-5">{{ isRegistering ? 'Register' : 'Log in' }}</h2>
+      <h2 class="text-start mb-3">{{ isRegistering ? 'Register' : 'Log in' }}</h2>
       <form @submit.prevent="isRegistering ? handleRegister() : handleLogin()">
         
         <!-- Username Input Field -->
@@ -198,8 +198,8 @@ html, body {
 .custom-btn {
   background-color: rgb(138, 0, 183) !important;
   color: white !important; 
-  font-size: 16px;
-  padding: 12px 25px;
+  font-size: 13px;
+  padding: 10px 20px;
   border-radius: 30px;
   border: none;
   transition: background-color 0.3s ease, transform 0.2s ease;
