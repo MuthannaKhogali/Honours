@@ -9,45 +9,39 @@
       </p>
     </div>
     
-    <!-- Form Box -->
-    <div :class="['form-box', { 'adjust-left': !isSmallScreen }]">
+  <!-- Form Box -->
+  <div :class="['form-box', { 'adjust-left': !isSmallScreen }]">
       <h2>{{ isRegistering ? 'Register' : 'Log in' }}</h2>
       <form @submit.prevent="isRegistering ? handleRegister() : handleLogin()">
         
         <!-- Username Input Field -->
-        <div class="input-group centered-group">
-          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
-            <input class="mdl-textfield__input" type="text" v-model="username" required />
-            <label class="mdl-textfield__label">Username</label>
-          </div>
+        <div class="mb-3 text-start">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-control" v-model="username" required />
         </div>
         
         <!-- Password Input Field -->
-        <div class="input-group centered-group">
-          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
-            <input class="mdl-textfield__input" type="password" v-model="password" required />
-            <label class="mdl-textfield__label">Password</label>
-          </div>
+        <div class="mb-3 text-start">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" v-model="password" required />
         </div>
         
         <!-- Confirm Password Field -->
-        <div v-if="isRegistering" class="input-group centered-group">
-          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-dirty">
-            <input class="mdl-textfield__input" type="password" v-model="confirmPassword" required />
-            <label class="mdl-textfield__label">Confirm Password</label>
-          </div>
+        <div v-if="isRegistering" class="mb-3 text-start">
+          <label class="form-label">Confirm Password</label>
+          <input type="password" class="form-control" v-model="confirmPassword" required />
         </div>
         
         <!-- Error Message -->
         <p v-if="errorMessage" class="text-danger">{{ errorMessage }}</p>
         
         <!-- Submit Button -->
-        <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+        <button type="submit" class="btn btn-primary">
           {{ isRegistering ? 'Register' : 'Login' }}
         </button>
         
         <!-- Switch Between Login and Register -->
-        <p v-if="isSmallScreen" class="mobile-text">
+        <p v-if="isSmallScreen" class="mt-3">
           {{ isRegistering ? "Already have an account?" : "Don't have an account?" }}
           <a href="#" @click.prevent="toggleMode" class="text-link">{{ isRegistering ? 'Login Now' : 'Register Now' }}</a>
         </p>

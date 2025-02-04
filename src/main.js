@@ -8,8 +8,8 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 // Import MDL to Vue
-import 'material-design-lite/material.min.css';
-import 'material-design-lite/material.min.js';
+// import 'material-design-lite/material.min.css';
+// import 'material-design-lite/material.min.js';
 
 const app = createApp(App);
 app.use(router);
