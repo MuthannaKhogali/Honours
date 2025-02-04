@@ -10,8 +10,13 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">{{ username }}</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="#" @click="logout">Log out</a></li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
@@ -45,18 +50,30 @@
 export default {
     data() {
         return {
-            username: 'USERNAME' // Default value
+            username: 'USERMANE' // Default username before login
         };
     },
     mounted() {
-        const storedUsername = localStorage.getItem('username');
-        if (storedUsername) {
-            this.username = storedUsername;
+        this.getUsername();
+        window.addEventListener("storage", this.getUsername);
+    },
+    beforeDestroy() {
+        window.removeEventListener("storage", this.getUsername);
+    },
+    methods: {
+        getUsername() {
+            const storedUsername = localStorage.getItem('username');
+            this.username = storedUsername ? storedUsername : 'USERMANE';
+        },
+        logout() {
+            localStorage.removeItem('username');
+            localStorage.removeItem('userID');
+            this.username = "USERNAME";
+            this.$router.push('/');
         }
     }
 };
 </script>
-
 
 <style scoped>
 .custom-navbar {
