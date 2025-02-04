@@ -8,10 +8,10 @@
         <a href="#" @click.prevent="toggleMode" class="text-link">{{ isRegistering ? 'Login Now' : 'Register Now' }}</a>
       </p>
     </div>
-    
-  <!-- Form Box -->
-  <div :class="['form-box', { 'adjust-left': !isSmallScreen }]">
-      <h2>{{ isRegistering ? 'Register' : 'Log in' }}</h2>
+
+    <!-- Form Box -->
+    <div :class="['form-box', { 'adjust-left': !isSmallScreen }]">
+      <h2 class="text-start mb-5">{{ isRegistering ? 'Register' : 'Log in' }}</h2>
       <form @submit.prevent="isRegistering ? handleRegister() : handleLogin()">
         
         <!-- Username Input Field -->
@@ -19,27 +19,27 @@
           <label class="form-label">Username</label>
           <input type="text" class="form-control" v-model="username" required />
         </div>
-        
+
         <!-- Password Input Field -->
         <div class="mb-3 text-start">
           <label class="form-label">Password</label>
           <input type="password" class="form-control" v-model="password" required />
         </div>
-        
+
         <!-- Confirm Password Field -->
         <div v-if="isRegistering" class="mb-3 text-start">
           <label class="form-label">Confirm Password</label>
           <input type="password" class="form-control" v-model="confirmPassword" required />
         </div>
-        
+
         <!-- Error Message -->
         <p v-if="errorMessage" class="text-danger">{{ errorMessage }}</p>
-        
-        <!-- Submit Button -->
-        <button type="submit" class="btn btn-primary">
+
+        <!-- Bigger Purple Button (Fixed Text Color) -->
+        <button type="submit" class="btn custom-btn">
           {{ isRegistering ? 'Register' : 'Login' }}
         </button>
-        
+
         <!-- Switch Between Login and Register -->
         <p v-if="isSmallScreen" class="mt-3">
           {{ isRegistering ? "Already have an account?" : "Don't have an account?" }}
@@ -70,7 +70,7 @@ export default {
       this.isRegistering = !this.isRegistering;
       this.errorMessage = '';
     },
-    
+
     // handle login request
     async handleLogin() {
       try {
@@ -84,7 +84,7 @@ export default {
         this.errorMessage = error.response?.data?.error || 'Login failed.';
       }
     },
-    
+
     // handle register request
     async handleRegister() {
       if (this.password !== this.confirmPassword) {
@@ -102,13 +102,13 @@ export default {
         this.errorMessage = error.response?.data?.error || 'Registration failed.';
       }
     },
-    
+
     // responsiveness
     handleResize() {
       this.isSmallScreen = window.innerWidth <= 1150 || window.innerHeight <= 780;
     }
   },
-  
+
   // event listener for different sized screen
   mounted() {
     window.addEventListener('resize', this.handleResize);
@@ -164,10 +164,12 @@ html, body {
   text-align: center;
   transition: width 0.3s ease-in-out;
 }
-@media (max-width: 768px) {
+@media (max-width: 1150px) {
   .form-box {
     width: 90vw;
     padding: 30px;
+    border-radius: 40px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -192,6 +194,29 @@ html, body {
   width: 100%;
 }
 
+/* Bigger Purple Button */
+.custom-btn {
+  background-color: rgb(138, 0, 183) !important;
+  color: white !important; 
+  font-size: 16px;
+  padding: 12px 25px;
+  border-radius: 30px;
+  border: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  width: 100%;
+  font-weight: bold; 
+}
+
+.custom-btn:hover {
+  background-color: rgb(115, 0, 160) !important;
+  transform: scale(1.05);
+}
+
+.custom-btn:active {
+  background-color: rgb(90, 0, 130) !important;
+  transform: scale(0.95);
+}
+
 /* Text Link Styling */
 .text-link {
   color: white;
@@ -205,5 +230,4 @@ html, body {
     color: rgb(62, 101, 255);
   }
 }
-
 </style>

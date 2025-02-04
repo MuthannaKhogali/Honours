@@ -19,7 +19,7 @@
         </nav>
       <!-- Main content -->
       <main class="container mt-4">
-        <h6 class="text-left">Generate Questions</h6>
+        <h5>Generate Questions</h5>
   
         <!-- Input Container -->
         <div class="input-group mt-3">
