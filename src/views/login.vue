@@ -161,8 +161,6 @@ html, body {
   width: 50vw;
   background: white;
   padding: 50px;
-  border-radius: 40px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   text-align: center;
   transition: width 0.3s ease-in-out;
 }
@@ -208,18 +206,4 @@ html, body {
   }
 }
 
-/* Error Message */
-.text-danger {
-  color: red;
-  margin-top: 10px;
-}
-
-/* Button Styling */
-button.mdl-button {
-  background-color: rgb(138, 0, 183) !important;
-  color: white !important;
-}
-button.mdl-button:hover {
-  background-color: rgb(115, 0, 152) !important;
-}
 </style>
