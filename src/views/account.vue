@@ -50,7 +50,7 @@
 export default {
     data() {
         return {
-            username: 'USERMANE' // Default username before login
+            username: 'USERMAME' // Default username before login
         };
     },
     mounted() {
@@ -63,7 +63,7 @@ export default {
     methods: {
         getUsername() {
             const storedUsername = localStorage.getItem('username');
-            this.username = storedUsername ? storedUsername : 'USERMANE';
+            this.username = storedUsername ? storedUsername : 'USERNAME';
         },
         logout() {
             localStorage.removeItem('username');
