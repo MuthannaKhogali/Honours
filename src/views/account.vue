@@ -40,6 +40,9 @@
                 </button>
             </div>
 
+            <h5 class="text-start mt-4">Customise Questions</h5>
+            <p class="text-start">Here will have options such as how many questions and timer ect </p>
+
             <h5 class="text-start mt-4">Recent</h5>
             <p class="text-start">Here will show all your recent generated questions</p>
         </main>
