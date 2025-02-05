@@ -4,7 +4,7 @@ const express = require('express'); // web server framework
 const cors = require('cors'); // added cors
 const { getTranscript } = require('youtube-transcript-api'); // library for fetching YouTube video transcripts
 const app = express();
-const port = 3000; // port where the server is
+const port = 5000; // port where the server is
 const { registerUser, loginUser } = require('./auth');
 
 // enables CORS for all routes

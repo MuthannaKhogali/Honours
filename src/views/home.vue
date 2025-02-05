@@ -124,31 +124,50 @@ export default {
   },
   methods: {
     // fetches questions from the backend
-    async fetchQuestions() {
-      this.loading = true;
-      this.errorMessage = '';
-      this.questions = [];
-      this.currentQuestion = 0;
-      this.feedback = '';
-      this.score = 0;
-      this.quizFinished = false;
-      this.answers = [];
-      try {
-        // send GET request to backend with the YouTube link as a parameter
-        const response = await axios.get('http://localhost:3000/generate-questions', {
-          params: { videoUrl: this.youtubeLink }
-        });
+  async fetchQuestions() {
+    this.loading = true;
+    this.errorMessage = '';
+    this.questions = [];
+    this.currentQuestion = 0;
+    this.feedback = '';
+    this.score = 0;
+    this.quizFinished = false;
+    this.answers = [];
+  
+    try {
+      const response = await axios.get('http://localhost:5000/generate-questions', {
+        params: { videoUrl: this.youtubeLink }
+      });
 
-        // clean the received JSON data and 
-        let cleanedResponse = response.data.questions.replace(/```json|```/g, '').trim();
-        this.questions = JSON.parse(cleanedResponse);
-      } catch (error) {
-        // display error message if an error
-        this.errorMessage = error.response?.data?.error || 'An error occurred while generating questions.';
-      } finally {
-        this.loading = false;
-      }
-    },
+      // clean the response
+      let cleanedResponse = response.data.questions.replace(/```json|```/g, '').trim();
+      this.questions = JSON.parse(cleanedResponse);
+
+      // shuffle options for each question cause gemini dumb
+      this.questions = this.questions.map(q => {
+        // create copy of options array and shuffle
+        let shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+        return {
+          // copy all properties from orginals object
+          ...q,
+
+          // replace options with shuffled ones
+          options: shuffledOptions,
+
+          // store original answer
+          originalAnswer: q.answer,
+          // makes sure correct answer still the same
+          answer: shuffledOptions.find(opt => opt === q.answer)
+        };
+      });
+
+    } catch (error) {
+      this.errorMessage = error.response?.data?.error || 'An error occurred while generating questions.';
+    } finally {
+      this.loading = false;
+    }
+  },
+
 
     // handles answer selection and scoring
     selectAnswer(option) {
