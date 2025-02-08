@@ -15,14 +15,14 @@ app.use(cors());
 app.use(express.json()); // parses incoming JSON requests
 app.use(express.urlencoded({ extended: true }));
 
-// gets the youtube transcript using yt-dlp and saves it as a uniquely named file
+// gets the youtube transcript using yt-dlp
 const getYouTubeTranscript = async (videoUrl) => {
     return new Promise((resolve, reject) => {
-        // Generate a unique filename based on timestamp and random bytes
+        // generate a unique
         const uniqueId = crypto.randomBytes(6).toString("hex");
         const transcriptFile = `transcript_${uniqueId}.en.vtt`;
 
-        // Escape the videoUrl by wrapping it in double quotes
+        // escape the videoUrl by wrapping it in double quotes
         exec(`yt-dlp --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "transcript_${uniqueId}.%(ext)s" "${videoUrl}"`, (error, stdout, stderr) => {
             if (error) {
                 reject(new Error(`yt-dlp error: ${error.message}`));
@@ -32,7 +32,7 @@ const getYouTubeTranscript = async (videoUrl) => {
                 console.error(`stderr: ${stderr}`);
             }
 
-            // Wait for the file to be written before reading it
+            // wait for the file to be written before reading it
             setTimeout(() => {
                 fs.readFile(transcriptFile, "utf8", (err, data) => {
                     if (err) {
@@ -40,7 +40,7 @@ const getYouTubeTranscript = async (videoUrl) => {
                         return;
                     }
 
-                    // Convert .vtt to plain text
+                    // convert .vtt to plain text
                     const transcriptText = data
                         .split("\n")
                         .filter(line => !line.startsWith("WEBVTT") && !line.match(/^\d+$/) && !line.includes("-->"))
@@ -48,7 +48,7 @@ const getYouTubeTranscript = async (videoUrl) => {
                         .replace(/\s+/g, " ")
                         .trim();
 
-                    // Cleanup: Delete the temporary transcript file
+                    // delete the temporary transcript file
                     fs.unlink(transcriptFile, (unlinkErr) => {
                         if (unlinkErr) {
                             console.error(`Failed to delete transcript file: ${unlinkErr.message}`);
