@@ -17,6 +17,7 @@ coverage
 /cypress/videos/
 /cypress/screenshots/
 .env
+transcript.en.vtt
 
 # Editor directories and files
 .vscode/*

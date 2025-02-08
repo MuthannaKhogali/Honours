@@ -2,7 +2,8 @@ require('dotenv').config(); // loads environment variables from the .env file
 const axios = require('axios'); // library for making HTTP requests
 const express = require('express'); // web server framework
 const cors = require('cors'); // added cors
-const { getTranscript } = require('youtube-transcript-api'); // library for fetching YouTube video transcripts
+const { exec } = require("child_process"); // used to run yt-dlp commands
+const fs = require("fs"); // used to read transcript files
 const app = express();
 const port = 5000; // port where the server is
 const { registerUser, loginUser } = require('./auth');
@@ -12,28 +13,45 @@ app.use(cors());
 app.use(express.json()); // parses incoming JSON requests
 app.use(express.urlencoded({ extended: true }));
 
-// gets the youtube transcript and throws errors depending on what it is
+// gets the youtube transcript using yt-dlp and saves it as "transcript.vtt"
 const getYouTubeTranscript = async (videoUrl) => {
-    try {
-        const videoId = new URL(videoUrl).searchParams.get('v'); // extracts the video ID from the URL
-        if (!videoId) {
-            throw new Error('Invalid URL');
-        }
-        const transcriptData = await getTranscript(videoId); // fetches the transcript using the video ID
-        if (!transcriptData.length) {
-            throw new Error('No captions available for this video.');
-        }
-        const transcript = transcriptData.map(item => item.text).join(' '); // joins transcript data into a single string
-        return transcript;
-    } catch (error) {
-        throw new Error(error.message || 'Error extracting transcript.');
-    }
+    return new Promise((resolve, reject) => {
+        exec(`yt-dlp --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "transcript.%(ext)s" ${videoUrl}`, (error, stdout, stderr) => {
+            if (error) {
+                reject(new Error(`yt-dlp error: ${error.message}`));
+                return;
+            }
+            if (stderr) {
+                console.error(`stderr: ${stderr}`);
+            }
+
+            // Wait for the file to be written before reading it
+            setTimeout(() => {
+                fs.readFile("transcript.en.vtt", "utf8", (err, data) => {
+                    if (err) {
+                        reject(new Error("Failed to read transcript file."));
+                        return;
+                    }
+
+                    // Convert .vtt to plain text
+                    const transcriptText = data
+                        .split("\n")
+                        .filter(line => !line.startsWith("WEBVTT") && !line.match(/^\d+$/) && !line.includes("-->"))
+                        .join(" ")
+                        .replace(/\s+/g, " ")
+                        .trim();
+
+                    resolve(transcriptText);
+                });
+            }, 2000); // delay to ensure file is saved
+        });
+    });
 };
 
 // generates the questions
-const generateQuestions = async (transcript) => {
+const generateQuestions = async (transcriptText) => {
     try {
-        if (!transcript) {
+        if (!transcriptText) {
             throw new Error('Transcript is empty.');
         }
         const response = await axios.post(
@@ -42,7 +60,7 @@ const generateQuestions = async (transcript) => {
                 // question to gemini
                 contents: [{
                      parts: [{ 
-                        text: `Make sure to read these subtitles: ${transcript}. Generate 5 multiple-choice questions.
+                        text: `Make sure to read these subtitles: ${transcriptText}. Generate 5 multiple-choice questions.
                         The first thing you must do is find out what the general topic the video is talking about.
                         If the person making the video makes an obscure reference or example you must NOT ask about it.
                         You must also NOT ask questions about background knowledge and must be relevant to the general topic of the video.
@@ -66,7 +84,6 @@ const generateQuestions = async (transcript) => {
         throw new Error('Error generating questions from Gemini API.');
     }
 };
-
 
 // endpoint to generate questions based on a YouTube video URL.
 // fetches the transcript and sends it to the Gemini API for generating questions.
