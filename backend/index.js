@@ -22,7 +22,8 @@ const getYouTubeTranscript = async (videoUrl) => {
         const uniqueId = crypto.randomBytes(6).toString("hex");
         const transcriptFile = `transcript_${uniqueId}.en.vtt`;
 
-        exec(`yt-dlp --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "transcript_${uniqueId}.%(ext)s" ${videoUrl}`, (error, stdout, stderr) => {
+        // Escape the videoUrl by wrapping it in double quotes
+        exec(`yt-dlp --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "transcript_${uniqueId}.%(ext)s" "${videoUrl}"`, (error, stdout, stderr) => {
             if (error) {
                 reject(new Error(`yt-dlp error: ${error.message}`));
                 return;
