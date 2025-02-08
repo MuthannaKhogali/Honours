@@ -165,7 +165,7 @@ export default {
     },
     mounted() {
         this.getUsername();
-        window.addEventListener("storage", this.getUsername); // ✅ Updates username dynamically
+        window.addEventListener("storage", this.getUsername);
     },
     beforeDestroy() {
         window.removeEventListener("storage", this.getUsername);
