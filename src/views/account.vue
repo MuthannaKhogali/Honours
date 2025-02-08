@@ -53,7 +53,7 @@
 export default {
     data() {
         return {
-            username: 'USERMAME' // Default username before login
+            username: 'USERMAME' // default username before login
         };
     },
     mounted() {

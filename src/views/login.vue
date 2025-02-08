@@ -95,7 +95,7 @@ export default {
         return;
       }
       try {
-        await axios.post('http://localhost:3000/register', {
+        await axios.post('http://localhost:5000/register', {
           username: this.username,
           password: this.password
         });
