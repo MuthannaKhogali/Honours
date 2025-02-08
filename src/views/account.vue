@@ -30,20 +30,22 @@
             <!-- Input Container -->
             <div class="input-group mt-3">
                 <input
-                    v-model="questionInput"
+                    v-model="youtubeLink"
                     class="form-control custom-input"
                     type="text"
                     placeholder="Enter YouTube Link"
                 />
-                <button @click="generateQuestion" class="btn custom-btn">
+                <button @click="fetchQuestions" class="btn custom-btn">
                     Generate
                 </button>
             </div>
 
+            <!-- Error Message -->
+            <p v-if="errorMessage" class="text-danger">{{ errorMessage }}</p>
+
             <!-- Customise Questions -->
             <h5 class="text-start mt-4">Customise Questions</h5>
             <div class="row mt-3">
-                <!-- Number of Questions -->
                 <div class="col-md-3">
                     <label for="numQuestions" class="form-label">Questions</label>
                     <select v-model="numQuestions" id="numQuestions" class="form-select">
@@ -54,7 +56,6 @@
                     </select>
                 </div>
 
-                <!-- Time Limit -->
                 <div class="col-md-3">
                     <label for="timeLimit" class="form-label">Time</label>
                     <select v-model="timeLimit" id="timeLimit" class="form-select">
@@ -65,7 +66,6 @@
                     </select>
                 </div>
 
-                <!-- Type of Questions (Multi-Select) -->
                 <div class="col-md-3">
                     <label class="form-label">Type of Questions</label>
                     <div class="btn-group w-100" role="group">
@@ -81,23 +81,81 @@
                 </div>
             </div>
 
-            <h5 class="text-start mt-4">Recent</h5>
-            <p class="text-start">Here will show all your recent generated questions</p>
+            <h5 class="text-start mt-4">Generated Questions</h5>
+            
+            <!-- Loader Animation -->
+            <div v-if="loading" class="loader"></div>
+
+            <div v-if="questions.length" class="shadow-lg p-4 mb-4 bg-white rounded">
+                <template v-if="!quizFinished">
+                    <p>{{ questions[currentQuestion].question }}</p>
+                    <div class="d-flex flex-column">
+                        <button 
+                            v-for="(option, index) in questions[currentQuestion].options" 
+                            :key="index"
+                            class="btn m-1 btn-secondary"
+                            :class="{
+                                'btn-success': answers[currentQuestion] === option && feedback === 'Correct!',
+                                'btn-danger': feedback && answers[currentQuestion] === option && feedback !== 'Correct!',
+                                'btn-success': feedback !== '' && option === questions[currentQuestion].answer
+                            }"
+                            :disabled="feedback !== ''"
+                            @click="selectAnswer(option)">
+                            {{ option }}
+                        </button>
+                    </div>
+                    <p v-if="feedback" :class="{'text-success': feedback === 'Correct!', 'text-danger': feedback !== 'Correct!'}">
+                        {{ feedback }}
+                    </p>
+                </template>
+
+                <template v-if="quizFinished">
+                    <h2>Quiz Complete!</h2>
+                    <h3>Your score: {{ score }} / {{ questions.length }}</h3>
+                    <div v-for="(question, index) in questions" :key="index" class="mb-4">
+                        <p><strong>Q{{ index + 1 }}: {{ question.question }}</strong></p>
+                        <p><strong>Your Answer:</strong> {{ answers[index] }}</p>
+                        <p :class="{'text-success': answers[index] === question.answer, 'text-danger': answers[index] !== question.answer}">
+                            <strong>Correct Answer:</strong> {{ question.answer }}
+                        </p>
+                    </div>
+                </template>
+
+                <!-- Navigation Buttons -->
+                <div class="d-flex justify-content-between mt-3" v-if="!quizFinished">
+                    <button class="btn btn-secondary" @click="prevQuestion" :disabled="currentQuestion === 0">
+                        Previous
+                    </button>
+                    <button class="btn btn-secondary" @click="nextQuestion">
+                        {{ currentQuestion === questions.length - 1 ? 'Finish' : 'Next' }}
+                    </button>
+                </div>
+            </div>
         </main>
     </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
     data() {
         return {
-            username: 'USERNAME', // default username before login
-            questionInput: "",
+            username: localStorage.getItem('username') || 'USERNAME',
+            youtubeLink: "",
+            questions: [],
+            errorMessage: '',
+            loading: false,
+            currentQuestion: 0,
+            feedback: '',
+            score: 0,
+            selectedOption: '',
+            answers: [],
+            quizFinished: false,
+
             numQuestions: 5,
             timeLimit: 120,
             selectedQuestionTypes: ["multiple-choice"],
-
-            // Available Question Types
             questionTypes: [
                 { value: "multiple-choice", label: "Multiple Choice" },
                 { value: "true-false", label: "True / False" },
@@ -107,21 +165,42 @@ export default {
     },
     mounted() {
         this.getUsername();
-        window.addEventListener("storage", this.getUsername);
+        window.addEventListener("storage", this.getUsername); // ✅ Updates username dynamically
     },
     beforeDestroy() {
         window.removeEventListener("storage", this.getUsername);
     },
     methods: {
         getUsername() {
-            const storedUsername = localStorage.getItem('username');
-            this.username = storedUsername ? storedUsername : 'USERNAME';
+            this.username = localStorage.getItem('username') || 'USERNAME';
         },
         logout() {
             localStorage.removeItem('username');
-            localStorage.removeItem('userID');
             this.username = "USERNAME";
             this.$router.push('/');
+        },
+        async fetchQuestions() {
+            this.loading = true;
+            this.errorMessage = '';
+            this.questions = [];
+            this.currentQuestion = 0;
+            this.feedback = '';
+            this.score = 0;
+            this.quizFinished = false;
+            this.answers = [];
+
+            try {
+                const response = await axios.get('http://localhost:5000/generate-questions', {
+                    params: { videoUrl: this.youtubeLink }
+                });
+
+                let cleanedResponse = response.data.questions.replace(/```json|```/g, '').trim();
+                this.questions = JSON.parse(cleanedResponse);
+            } catch (error) {
+                this.errorMessage = error.response?.data?.error || 'An error occurred while generating questions.';
+            } finally {
+                this.loading = false;
+            }
         },
         toggleQuestionType(type) {
             if (this.selectedQuestionTypes.includes(type)) {
@@ -132,16 +211,29 @@ export default {
                 this.selectedQuestionTypes.push(type);
             }
         },
-        generateQuestion() {
-            console.log("Generating questions with:", {
-                numQuestions: this.numQuestions,
-                timeLimit: this.timeLimit,
-                selectedQuestionTypes: this.selectedQuestionTypes
-            });
+        selectAnswer(option) {
+            this.answers[this.currentQuestion] = option;
+            this.feedback = option === this.questions[this.currentQuestion].answer ? 'Correct!' : 'Incorrect!';
+            if (this.feedback === 'Correct!') this.score++;
+        },
+        nextQuestion() {
+            if (this.currentQuestion < this.questions.length - 1) {
+                this.currentQuestion++;
+                this.feedback = '';
+            } else {
+                this.quizFinished = true;
+            }
+        },
+        prevQuestion() {
+            if (this.currentQuestion > 0) {
+                this.currentQuestion--;
+                this.feedback = '';
+            }
         }
     }
 };
 </script>
+
 
 <style scoped>
 /* Navbar */
@@ -201,4 +293,21 @@ export default {
     background-color: rgb(138, 0, 183);
     color: white;
 }
+
+ /* loader for the spinning circle animation taken from w3 school https://www.w3schools.com/howto/howto_css_loader.asp*/
+ .loader {
+    border: 16px solid #f3f3f3; /* border for the circle */
+    border-top: 16px solid #000000; /* spinning part */
+    border-radius: 50%; /* makes it a circle */
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite; /* continuous spin animation */
+    margin: 30px auto;
+  }
+  
+  /* keyframes for the spinning animation */
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 </style>
