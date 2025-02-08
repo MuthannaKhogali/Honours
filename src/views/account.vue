@@ -176,6 +176,7 @@ export default {
         },
         logout() {
             localStorage.removeItem('username');
+            localStorage.removeItem('userID');
             this.username = "USERNAME";
             this.$router.push('/');
         },
