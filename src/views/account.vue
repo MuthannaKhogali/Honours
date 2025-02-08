@@ -35,13 +35,51 @@
                     type="text"
                     placeholder="Enter YouTube Link"
                 />
-                <button @click="generateQuestion" class="btn btn-dark">
+                <button @click="generateQuestion" class="btn custom-btn">
                     Generate
                 </button>
             </div>
 
+            <!-- Customise Questions -->
             <h5 class="text-start mt-4">Customise Questions</h5>
-            <p class="text-start">Here will have options such as how many questions and timer ect </p>
+            <div class="row mt-3">
+                <!-- Number of Questions -->
+                <div class="col-md-3">
+                    <label for="numQuestions" class="form-label">Questions</label>
+                    <select v-model="numQuestions" id="numQuestions" class="form-select">
+                        <option :value="5">5 Questions</option>
+                        <option :value="10">10 Questions</option>
+                        <option :value="15">15 Questions</option>
+                        <option :value="20">20 Questions</option>
+                    </select>
+                </div>
+
+                <!-- Time Limit -->
+                <div class="col-md-3">
+                    <label for="timeLimit" class="form-label">Time</label>
+                    <select v-model="timeLimit" id="timeLimit" class="form-select">
+                        <option :value="120">2 Minutes</option>
+                        <option :value="300">5 Minutes</option>
+                        <option :value="600">10 Minutes</option>
+                        <option :value="0">No Timer</option>
+                    </select>
+                </div>
+
+                <!-- Type of Questions (Multi-Select) -->
+                <div class="col-md-3">
+                    <label class="form-label">Type of Questions</label>
+                    <div class="btn-group w-100" role="group">
+                        <button
+                            v-for="(type, index) in questionTypes"
+                            :key="index"
+                            @click="toggleQuestionType(type.value)"
+                            :class="['btn', 'custom-toggle-btn', selectedQuestionTypes.includes(type.value) ? 'active' : '']"
+                        >
+                            {{ type.label }}
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <h5 class="text-start mt-4">Recent</h5>
             <p class="text-start">Here will show all your recent generated questions</p>
@@ -53,7 +91,18 @@
 export default {
     data() {
         return {
-            username: 'USERMAME' // default username before login
+            username: 'USERNAME', // default username before login
+            questionInput: "",
+            numQuestions: 5,
+            timeLimit: 120,
+            selectedQuestionTypes: ["multiple-choice"],
+
+            // Available Question Types
+            questionTypes: [
+                { value: "multiple-choice", label: "Multiple Choice" },
+                { value: "true-false", label: "True / False" },
+                { value: "short-answer", label: "Short Answer" }
+            ]
         };
     },
     mounted() {
@@ -73,12 +122,29 @@ export default {
             localStorage.removeItem('userID');
             this.username = "USERNAME";
             this.$router.push('/');
+        },
+        toggleQuestionType(type) {
+            if (this.selectedQuestionTypes.includes(type)) {
+                if (this.selectedQuestionTypes.length > 1) {
+                    this.selectedQuestionTypes = this.selectedQuestionTypes.filter(t => t !== type);
+                }
+            } else {
+                this.selectedQuestionTypes.push(type);
+            }
+        },
+        generateQuestion() {
+            console.log("Generating questions with:", {
+                numQuestions: this.numQuestions,
+                timeLimit: this.timeLimit,
+                selectedQuestionTypes: this.selectedQuestionTypes
+            });
         }
     }
 };
 </script>
 
 <style scoped>
+/* Navbar */
 .custom-navbar {
     background-color: rgb(138, 0, 183) !important;
 }
@@ -87,8 +153,52 @@ export default {
     color: white !important;
 }
 
+/* Input */
 .custom-input {
     max-width: 1000px;
 }
 
+/* Select Box */
+.form-label {
+    font-weight: bold;
+    display: block;
+}
+
+.form-select {
+    width: 50%;
+}
+
+/* Custom Buttons */
+.custom-btn {
+    background-color: rgb(138, 0, 183) !important;
+    color: white !important;
+    font-size: 14px;
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.custom-btn:hover {
+    background-color: rgb(110, 0, 150) !important;
+    transform: scale(1.0);
+}
+
+.custom-toggle-btn {
+    background-color: transparent;
+    border: 1px solid rgb(138, 0, 183);
+    color: rgb(138, 0, 183);
+
+}
+
+.custom-toggle-btn:hover {
+    background-color: rgba(138, 0, 183, 0.2);
+    color: rgb(138, 0, 183);
+}
+
+
+.custom-toggle-btn.active {
+    background-color: rgb(138, 0, 183);
+    color: white;
+}
 </style>
