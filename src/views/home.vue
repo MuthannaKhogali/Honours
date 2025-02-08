@@ -21,6 +21,9 @@
     <div class="content text-center">
       <h1>Study Easier Using NAME</h1>
       <p class="text-muted">Generate questions from videos, and test your knowledge</p>
+      <router-link to="/login">
+        <button class="custom-btn">Sign Up Now</button>
+      </router-link>
     </div>
   </div>
 </template>
@@ -41,7 +44,24 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 30vh;
+  height: 50vh;
   text-align: center;
+}
+
+.custom-btn {
+  background-color: rgb(138, 0, 183) !important;
+  color: white !important; 
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 30px;
+  border: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-weight: bold; 
+  margin-top: 15px;
+}
+
+.custom-btn:hover {
+  background-color: rgb(120, 0, 160) !important;
+  transform: scale(1.05);
 }
 </style>
