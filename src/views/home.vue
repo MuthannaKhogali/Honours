@@ -1,4 +1,5 @@
 <template>
+  <div class="home-page">
     <nav class="navbar navbar-expand-lg navbar-dark bg-purple">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">Logo</a>
@@ -16,6 +17,12 @@
         </div>
       </div>
     </nav>
+
+    <div class="content text-center">
+      <h1>Study Easier Using NAME</h1>
+      <p class="text-muted">Generate questions from videos, and test your knowledge</p>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -27,5 +34,14 @@ export default {
 <style scoped>
 .bg-purple {
   background-color: rgb(138, 0, 183) !important;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 30vh;
+  text-align: center;
 }
 </style>
