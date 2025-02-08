@@ -4,8 +4,8 @@ import LoginView from '@/views/login.vue';
 import AccountView from '@/views/account.vue';
 import  QuestionView from '@/views/QuestionTest.vue';
 import  TeacherLogin from '@/views/teacherLogin.vue';
-import  teacherAccount from '@/views/teacherAccount.vue';
 import TeacherAccount from '@/views/teacherAccount.vue';
+import QuizView from '@/views/quiz.vue';
 
 const routes = [
   {
@@ -21,6 +21,11 @@ const routes = [
     path: '/login', 
     name: 'login', 
     component: LoginView
+  },
+  { 
+    path: '/quiz', 
+    name: 'quiz', 
+    component: QuizView
   },
   { 
     path: '/QuestionTest', 
