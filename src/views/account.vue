@@ -192,7 +192,10 @@ export default {
 
             try {
                 const response = await axios.get('http://localhost:5000/generate-questions', {
-                    params: { videoUrl: this.youtubeLink }
+                    params: { 
+                        videoUrl: this.youtubeLink,
+                        numQuestions: this.numQuestions
+                    },
                 });
 
                 let cleanedResponse = response.data.questions.replace(/```json|```/g, '').trim();

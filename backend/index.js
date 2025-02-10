@@ -53,7 +53,6 @@ const getYouTubeTranscript = async (videoUrl) => {
                         if (unlinkErr) {
                             console.error(`Failed to delete transcript file: ${unlinkErr.message}`);
                         } else {
-                            console.log(`Deleted temporary file: ${transcriptFile}`);
                         }
                     });
 
@@ -65,7 +64,7 @@ const getYouTubeTranscript = async (videoUrl) => {
 };
 
 // generates the questions
-const generateQuestions = async (transcriptText) => {
+const generateQuestions = async (transcriptText, numQuestions) => {
     try {
         if (!transcriptText) {
             throw new Error('Transcript is empty.');
@@ -76,7 +75,9 @@ const generateQuestions = async (transcriptText) => {
                 // question to gemini
                 contents: [{
                     parts: [{ 
-                        text: `Make sure to read these subtitles: ${transcriptText}. Generate 5 multiple-choice questions.
+                        text: `Make sure to read these subtitles: ${transcriptText}. 
+                        Generate ${numQuestions} multiple-choice questions. Do not generate fewer or more than ${numQuestions}. 
+                        If you struggle to create ${numQuestions} meaningful questions, generate simpler but still relevant questions.
                         The first thing you must do is find out what the general topic the video is talking about.
                         If the person making the video makes an obscure reference or example you must NOT ask about it.
                         You must also NOT ask questions about background knowledge and must be relevant to the general topic of the video.
@@ -86,6 +87,7 @@ const generateQuestions = async (transcriptText) => {
                         Make your own judgment for now whether to generate example questions that are similar to the video or questions that may test users' memory from the video content. 
                         You may also include both types of questions.
                         When making the question please include in brackets after the question what time this was taking from the video like this [0:52] or [1:21], the time should be in the transcript.
+                        Even if you generate relevant questions you should say where in the video it would help to answer these questions.
                         Return a JSON list of multiple-choice questions. 
                         Each question should have a 'question' string, an 'options' array with four full-text answer choices, 
                         and an 'answer' string containing the exact matching full-text choice from the options array.` 
@@ -105,13 +107,13 @@ const generateQuestions = async (transcriptText) => {
 // endpoint to generate questions based on a YouTube video URL.
 // fetches the transcript and sends it to the Gemini API for generating questions.
 app.get('/generate-questions', async (req, res) => {
-    const { videoUrl } = req.query;
+    const { videoUrl, numQuestions = 5 } = req.query;
     if (!videoUrl) {
         return res.status(400).json({ error: 'Video URL is required.' });
     }
     try {
         const transcript = await getYouTubeTranscript(videoUrl);
-        const questions = await generateQuestions(transcript);
+        const questions = await generateQuestions(transcript, parseInt(numQuestions));
         res.json({ transcript, questions });
     } catch (error) {
         res.status(400).json({ error: error.message });
