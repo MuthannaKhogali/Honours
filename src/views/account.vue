@@ -88,7 +88,11 @@
 
             <div v-if="questions.length" class="shadow-lg p-4 mb-4 bg-white rounded">
                 <template v-if="!quizFinished">
-                    <p>{{ questions[currentQuestion].question }}</p>
+                    <p>{{ questions[currentQuestion].question }}
+                    <span v-if="timeLimit > 0" class="badge bg-secondary">
+                    Time Remaining: {{ timeRemaining }}s
+                    </span>
+                    </p>
                     <div class="d-flex flex-column">
                         <button 
                             v-for="(option, index) in questions[currentQuestion].options" 
@@ -152,6 +156,8 @@ export default {
             selectedOption: '',
             answers: [],
             quizFinished: false,
+            timer: null,
+            timeRemaining: 0,
 
             numQuestions: 5,
             timeLimit: 120,
@@ -198,6 +204,10 @@ export default {
                     },
                 });
 
+                if (this.timeLimit > 0) {
+                this.startTimer();
+                }
+
                 let cleanedResponse = response.data.questions.replace(/```json|```/g, '').trim();
                 this.questions = JSON.parse(cleanedResponse);
             } catch (error) {
@@ -220,6 +230,30 @@ export default {
             this.feedback = option === this.questions[this.currentQuestion].answer ? 'Correct!' : 'Incorrect!';
             if (this.feedback === 'Correct!') this.score++;
         },
+
+        startTimer() {
+            this.timeRemaining = this.timeLimit;
+            if (this.timer) clearInterval(this.timer);
+    
+                if (this.timeLimit > 0) {
+                    this.timer = setInterval(() => {
+                if (this.timeRemaining > 0) {
+                    this.timeRemaining--;
+                } else {
+                    this.quizFinished = true;
+                    clearInterval(this.timer);
+                }
+                }, 1000);
+            }
+        },
+
+        stopTimer() {
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+        },
+
         // moves to the next question or finishes the quiz
         nextQuestion() {
     
