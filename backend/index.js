@@ -85,6 +85,7 @@ const generateQuestions = async (transcriptText) => {
                         Of course this only relates to questions, sometimes people want to memorize content from a video.
                         Make your own judgment for now whether to generate example questions that are similar to the video or questions that may test users' memory from the video content. 
                         You may also include both types of questions.
+                        When making the question please include in brackets after the question what time this was taking from the video like this [0:52] or [1:21], the time should be in the transcript.
                         Return a JSON list of multiple-choice questions. 
                         Each question should have a 'question' string, an 'options' array with four full-text answer choices, 
                         and an 'answer' string containing the exact matching full-text choice from the options array.` 
