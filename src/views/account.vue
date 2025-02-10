@@ -217,21 +217,53 @@ export default {
             this.feedback = option === this.questions[this.currentQuestion].answer ? 'Correct!' : 'Incorrect!';
             if (this.feedback === 'Correct!') this.score++;
         },
+        // moves to the next question or finishes the quiz
         nextQuestion() {
-            if (this.currentQuestion < this.questions.length - 1) {
-                this.currentQuestion++;
-                this.feedback = '';
-            } else {
-                this.quizFinished = true;
-            }
-        },
-        prevQuestion() {
-            if (this.currentQuestion > 0) {
-                this.currentQuestion--;
-                this.feedback = '';
-            }
+    
+        // saves the current answer before moving to the next question
+        if (this.selectedOption) {
+        this.answers[this.currentQuestion] = this.selectedOption;
         }
+  
+        if (this.currentQuestion < this.questions.length - 1) {
+        this.currentQuestion++;
+        this.feedback = '';
+        // loads the previously saved answer for the next question (if any)
+        this.selectedOption = this.answers[this.currentQuestion] || '';
+        // display feedback if an answer exists
+        if (this.selectedOption) {
+            const correctAnswer = this.questions[this.currentQuestion].answer.trim().toLowerCase();
+            this.feedback = this.selectedOption.trim().toLowerCase() === correctAnswer
+            ? 'Correct!'
+            : 'Incorrect!';
+        }
+        } else {
+        this.quizFinished = true;
+        }
+    },
+    
+  // moves to the previous question
+  prevQuestion() {
+    if (this.currentQuestion > 0) {
+      // save the current answer before moving to the previous question
+      if (this.selectedOption) {
+        this.answers[this.currentQuestion] = this.selectedOption;
+      }
+  
+      this.currentQuestion--;
+      this.feedback = '';
+      // load the previously saved answer for the previous question (if any)
+      this.selectedOption = this.answers[this.currentQuestion] || '';
+      // display feedback if an answer exists
+      if (this.selectedOption) {
+        const correctAnswer = this.questions[this.currentQuestion].answer.trim().toLowerCase();
+        this.feedback = this.selectedOption.trim().toLowerCase() === correctAnswer
+          ? 'Correct!'
+          : 'Incorrect!';
+      }
     }
+  }
+}
 };
 </script>
 
