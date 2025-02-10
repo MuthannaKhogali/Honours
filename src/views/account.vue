@@ -333,7 +333,7 @@ export default {
  /* loader for the spinning circle animation taken from w3 school https://www.w3schools.com/howto/howto_css_loader.asp*/
  .loader {
     border: 16px solid #f3f3f3; /* border for the circle */
-    border-top: 16px solid #000000; /* spinning part */
+    border-top: 16px solid rgb(138, 0, 183); /* spinning part */
     border-radius: 50%; /* makes it a circle */
     width: 120px;
     height: 120px;
