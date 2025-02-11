@@ -114,6 +114,7 @@ const generateQuestions = async (transcriptText, numQuestions, questionTypes) =>
                         - You should NOT generate an example that has been gone over in the video but you shoulde create your own examples that are similar
                         - When making the question please include in brackets after the question what time this was taking from the video like this [0:52] or [1:21], the time should be in the transcript.
                         - Even if you generate relevant questions you should say where in the video it would help to answer these questions.
+                        - Try to keep the time it was taken from as accurate as possible 
                         Return a JSON list where each question contains:
                             - 'question' (string),
                             - 'type' ('multiple-choice', 'true-false', or 'short-answer'),
@@ -185,6 +186,9 @@ app.post('/validate-answer', async (req, res) => {
                         text: `Compare the following two responses from this question, "${question}", for similarities:
                         User Answer: "${userAnswer}"
                         Correct Answer: "${correctAnswer}"
+
+                        The user does NOT need to say the exact same answer even if its related enough mark it correct.
+                        If the is something question like give an example, mark the user correct if they give any correct example not just one in the correct answer.
       
                         If the meaning is similar and the user's response conveys the same key idea, respond with "Correct!".
                         If the response is incorrect or missing critical details, respond with "Incorrect!".

@@ -207,6 +207,7 @@
           if (geminiFeedback === 'Correct!') {
             this.score++;
           }
+          console.log(geminiFeedback);
           // store Gemini's response in the answers array
           this.answers[this.currentQuestion] = {
             userAnswer,
