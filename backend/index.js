@@ -118,7 +118,8 @@ const generateQuestions = async (transcriptText, numQuestions, questionTypes) =>
                             - 'question' (string),
                             - 'type' ('multiple-choice', 'true-false', or 'short-answer'),
                             - 'options' (array of choices, empty for short-answer),
-                            - 'answer' (the correct answer as a string).`
+                            - 'answer' (the correct answer as a string).
+                            - DO NOT ADD ANY ADDITIONAL PARAGRAPHS`
                     }]
                 }]
             },
@@ -197,7 +198,16 @@ app.post('/validate-answer', async (req, res) => {
             { headers: { 'Content-Type': 'application/json' } }
         );
 
+        if (!response.data.candidates || !response.data.candidates[0]?.content?.parts[0]?.text) {
+            throw new Error("Invalid Gemini response format.");
+        }
+
         const feedback = response.data.candidates[0].content.parts[0].text.trim();
+
+        // debugging log to check response from Gemini
+        console.log("Gemini validation response:", feedback); 
+
+        // send feedback correctly
         res.json({ feedback });
 
     } catch (error) {
