@@ -92,7 +92,7 @@ const generateQuestions = async (transcriptText, numQuestions, questionTypes) =>
         let formattedInstruction = questionTypeInstruction.join(" Also include ");
 
         // make sure only generates specific questions
-        let strictFilter = `You must ONLY generate the requested types: ${questionTypes.join(", ")}. DO NOT generate any other question type.`;
+        let strictFilter = `You must ONLY generate the requested types of questions: ${questionTypes.join(", ")}. DO NOT generate any other question type NO MATTER WHAT.`;
 
         console.log("sending request to Gemini API...", { numQuestions, questionTypes });
 
