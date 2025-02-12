@@ -70,25 +70,47 @@
           <p>{{ questions[currentQuestion].question }}
             <span v-if="timeLimit > 0" class="badge bg-secondary"> Time Remaining: {{ timeRemaining }}s </span>
           </p>
+          <!-- Multiple Choice Buttons -->
           <div v-if="questions[currentQuestion].type === 'multiple-choice'" class="d-flex flex-column">
-            <button v-for="(option, index) in questions[currentQuestion].options" :key="index" class="btn m-1 btn-secondary" :class="{
-              'btn-success': answers[currentQuestion] === option && feedback === 'Correct!',
-              'btn-danger': feedback && answers[currentQuestion] === option && feedback !== 'Correct!',
-              'btn-success': feedback !== '' && option === questions[currentQuestion].answer
-          }" :disabled="feedback !== ''" @click="selectAnswer(option)">
-              {{ option }}
-            </button>
+          <button 
+          v-for="(option, index) in questions[currentQuestion].options" 
+          :key="index" 
+          class="btn m-1 btn-secondary"
+          :class="{
+            'btn-success': feedback !== '' && option === questions[currentQuestion].answer, // Correct answer always green
+            'btn-danger': feedback !== '' && answers[currentQuestion]?.userAnswer === option && option !== questions[currentQuestion].answer, // Incorrect selected answer turns red
+            'btn-secondary': feedback === '' // Default state
+          }"
+          :disabled="feedback !== ''"
+          @click="selectAnswer(option)">
+          {{ option }}
+          </button>
           </div>
           <!-- True/False Buttons -->
           <div v-if="questions[currentQuestion].type === 'true-false'" class="d-flex flex-column">
-            <button class="btn m-1 btn-secondary" :class="{
-              'btn-success': answers[currentQuestion] === 'True' && feedback === 'Correct!',
-              'btn-danger': answers[currentQuestion] === 'True' && feedback !== 'Correct!',
-          }" :disabled="feedback !== ''" @click="selectAnswer('True')"> True </button>
-            <button class="btn m-1 btn-secondary" :class="{
-              'btn-success': answers[currentQuestion] === 'False' && feedback === 'Correct!',
-              'btn-danger': answers[currentQuestion] === 'False' && feedback !== 'Correct!',
-          }" :disabled="feedback !== ''" @click="selectAnswer('False')"> False </button>
+            <button 
+              class="btn m-1 btn-secondary" 
+              :class="{
+                'btn-success': feedback !== '' && 'True' === questions[currentQuestion].answer, // Correct answer green
+                'btn-danger': feedback !== '' && answers[currentQuestion]?.userAnswer === 'True' && 'True' !== questions[currentQuestion].answer, // Incorrect selection turns red
+                'btn-secondary': feedback === '' // Default state
+              }"
+            :disabled="feedback !== ''"
+            @click="selectAnswer('True')"> 
+            True 
+          </button>
+
+          <button 
+            class="btn m-1 btn-secondary" 
+            :class="{
+              'btn-success': feedback !== '' && 'False' === questions[currentQuestion].answer, // Correct answer green
+              'btn-danger': feedback !== '' && answers[currentQuestion]?.userAnswer === 'False' && 'False' !== questions[currentQuestion].answer, // Incorrect selection turns red
+              'btn-secondary': feedback === '' // Default state
+            }"
+            :disabled="feedback !== ''"
+            @click="selectAnswer('False')"> 
+            False 
+          </button>
           </div>
           <!-- Short Answer Input -->
           <div v-if="questions[currentQuestion].type === 'short-answer'">
@@ -110,7 +132,7 @@
               <strong>Q{{ index + 1 }}: {{ question.question }}</strong>
             </p>
             <p>
-              <strong>Your Answer:</strong> {{ answers[index]?.userAnswer || answers[index] }}
+              <strong>Your Answer:</strong> {{ answers[index]?.userAnswer ? answers[index]?.userAnswer : "N/A" }}
             </p>
             <p :class="{
             'text-success': (
@@ -208,12 +230,12 @@
             this.score++;
           }
           console.log(geminiFeedback);
-          // store Gemini's response in the answers array
           this.answers[this.currentQuestion] = {
             userAnswer,
-            feedback: geminiFeedback, // store response
-            correctAnswer // store correct answer for display
+            feedback: geminiFeedback, // Store Gemini's response
+            correctAnswer // Store correct answer for display
           };
+          console.log("Updated answers array:", JSON.stringify(this.answers, null, 2));
           this.answeredQuestions.push(this.currentQuestion);
           // update feedback immediately
           this.feedback = geminiFeedback;
@@ -262,8 +284,14 @@
         }
       },
       selectAnswer(option) {
-        this.answers[this.currentQuestion] = option;
-        this.feedback = option === this.questions[this.currentQuestion].answer ? 'Correct!' : 'Incorrect!';
+        this.selectedOption = option; // Store selected option
+        this.answers[this.currentQuestion] = {
+        userAnswer: option, // Save user answer
+        feedback: option === this.questions[this.currentQuestion].answer ? 'Correct!' : 'Incorrect!',
+        correctAnswer: this.questions[this.currentQuestion].answer
+        };
+        this.feedback = this.answers[this.currentQuestion].feedback; // Show feedback
+
         if (this.feedback === 'Correct!') this.score++;
       },
       startTimer() {
@@ -288,21 +316,26 @@
       },
       // moves to the next question or finishes the quiz
       nextQuestion() {
+        console.log("Answers before moving to next question:", JSON.stringify(this.answers, null, 2));
         // saves the current answer before moving to the next question
-        if (this.selectedOption) {
-          this.answers[this.currentQuestion] = this.selectedOption;
-        }
+        this.answers[this.currentQuestion] = {
+        userAnswer: this.selectedOption,
+        feedback: this.feedback,  
+        correctAnswer: this.questions[this.currentQuestion].answer 
+        };
         if (this.currentQuestion < this.questions.length - 1) {
           this.currentQuestion++;
           this.feedback = '';
           // loads the previously saved answer for the next question (if any)
           this.selectedOption = this.answers[this.currentQuestion] || '';
+          this.feedback = this.answers[this.currentQuestion]?.feedback || '';
           // display feedback if an answer exists
           if (this.selectedOption) {
             const correctAnswer = this.questions[this.currentQuestion].answer.trim().toLowerCase();
             this.feedback = this.selectedOption.trim().toLowerCase() === correctAnswer ? 'Correct!' : 'Incorrect!';
           }
         } else {
+          console.log("Final Answers before finishing quiz:", JSON.stringify(this.answers, null, 2));
           this.quizFinished = true;
         }
       },
@@ -317,6 +350,7 @@
           this.feedback = '';
           // load the previously saved answer for the previous question (if any)
           this.selectedOption = this.answers[this.currentQuestion] || '';
+          this.feedback = this.answers[this.currentQuestion]?.feedback || '';
           // display feedback if an answer exists
           if (this.selectedOption) {
             const correctAnswer = this.questions[this.currentQuestion].answer.trim().toLowerCase();
