@@ -67,7 +67,7 @@
       <div v-if="loading" class="loader"></div>
       <div v-if="questions.length" class="shadow-lg p-4 mb-4 bg-white rounded position-relative">
         <!-- Play Section Button -->
-        <button class="btn btn-secondary position-absolute top-0 end-0 m-2" @click="playVideo">
+        <button class="btn btn-secondary play-btn" @click="playVideo" v-if="!quizFinished">
           Play Section
         </button>
         <!-- Time Remaining -->
@@ -517,5 +517,23 @@
   font-size: 30px;
   cursor: pointer;
 }
+
+.play-btn {
+  margin-bottom: -30px;
+  margin-left: auto; /* Pushes the button to the right */
+  display: flex;
+  align-items: center; /* Align with the text */
+  white-space: nowrap; /* Prevents text wrapping */
+}
+
+/* Adjust layout for smaller screens */
+@media (max-width: 900px) {
+  .play-btn {
+    margin-bottom: 0px;
+    width: 100%; /* Make the button full-width on small screens */
+    justify-content: center; /* Center the button */
+    margin-top: 10px; /* Adds spacing from the question */
+  }
+} 
 
 </style>
