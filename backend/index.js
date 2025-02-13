@@ -120,7 +120,13 @@ const generateQuestions = async (transcriptText, numQuestions, questionTypes) =>
                             - 'type' ('multiple-choice', 'true-false', or 'short-answer'),
                             - 'options' (array of choices, empty for short-answer),
                             - 'answer' (the correct answer as a string).
-                            - DO NOT ADD ANY ADDITIONAL PARAGRAPHS`
+                            - DO NOT ADD ANY ADDITIONAL PARAGRAPHS
+                        Tips for designing a good question I RECCOMEND you should follow:
+                            - Make they are clear, concise and relevant to the video
+                            - For true and false questions make false statements subtly incorrect, not obviously wrong.
+                            - Short answer questions SHOULD start with State, Describe or Explain
+                            - Ofcourse if state, describe or explain does not fit the nature of the question do not force it in for example a maths question`
+                        
                     }]
                 }]
             },
@@ -183,9 +189,14 @@ app.post('/validate-answer', async (req, res) => {
             {
                 contents: [{
                     parts: [{
-                        text: `Compare the following two responses from this question, "${question}", for similarities:
+                        text: `Compare the following two responses from this question, "${question}":
                         User Answer: "${userAnswer}"
                         Correct Answer: "${correctAnswer}"
+                        
+                        If the question starts with state, the user would just need to put in a short answer
+                        If the questions starts with describe or explain the user must go a little more in depth with it
+
+                        If it doesn't start with either 3 use your own judgement.
 
                         The user does NOT need to say the exact same answer even if its related enough mark it correct.
                         If the is something question like give an example, mark the user correct if they give any correct example not just one in the correct answer.
