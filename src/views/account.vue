@@ -327,7 +327,7 @@
           this.currentQuestion++;
           this.feedback = '';
           // loads the previously saved answer for the next question (if any)
-          this.selectedOption = this.answers[this.currentQuestion] || '';
+          this.selectedOption = this.answers[this.currentQuestion]?.userAnswer || '';
           this.feedback = this.answers[this.currentQuestion]?.feedback || '';
           // display feedback if an answer exists
           if (this.selectedOption) {
@@ -343,13 +343,15 @@
       prevQuestion() {
         if (this.currentQuestion > 0) {
           // save the current answer before moving to the previous question
-          if (this.selectedOption) {
-            this.answers[this.currentQuestion] = this.selectedOption;
-          }
+          this.answers[this.currentQuestion] = {
+            userAnswer: this.selectedOption,
+            feedback: this.feedback,  
+            correctAnswer: this.questions[this.currentQuestion].answer 
+          };
           this.currentQuestion--;
           this.feedback = '';
           // load the previously saved answer for the previous question (if any)
-          this.selectedOption = this.answers[this.currentQuestion] || '';
+          this.selectedOption = this.answers[this.currentQuestion]?.userAnswer || '';
           this.feedback = this.answers[this.currentQuestion]?.feedback || '';
           // display feedback if an answer exists
           if (this.selectedOption) {
