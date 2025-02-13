@@ -65,7 +65,12 @@
       <h5 class="text-start mt-4">Generated Questions</h5>
       <!-- Loader Animation -->
       <div v-if="loading" class="loader"></div>
-      <div v-if="questions.length" class="shadow-lg p-4 mb-4 bg-white rounded">
+      <div v-if="questions.length" class="shadow-lg p-4 mb-4 bg-white rounded position-relative">
+        <!-- Play Section Button -->
+        <button class="btn btn-secondary position-absolute top-0 end-0 m-2" @click="playVideo">
+          Play Section
+        </button>
+        <!-- Time Remaining -->
         <template v-if="!quizFinished">
           <p>{{ questions[currentQuestion].question }}
             <span v-if="timeLimit > 0" class="badge bg-secondary"> Time Remaining: {{ timeRemaining }}s </span>
@@ -99,7 +104,6 @@
             @click="selectAnswer('True')"> 
             True 
           </button>
-
           <button 
             class="btn m-1 btn-secondary" 
             :class="{
@@ -160,6 +164,20 @@
       </div>
     </main>
   </div>
+  <!-- Video Modal -->
+  <div v-if="showVideoModal" class="video-modal">
+    <div class="video-modal-content">
+      <span class="video-close" @click="showVideoModal = false">&times;</span>
+      <iframe
+        width="100%"
+        height="400"
+        :src="videoUrlWithTimestamp"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen
+      ></iframe>
+    </div>
+  </div>
 </template>
 <script>
   import axios from 'axios';
@@ -183,6 +201,8 @@
         answeredQuestions: [],
         numQuestions: 5,
         timeLimit: 120,
+        showVideoModal: false,
+        videoUrlWithTimestamp: "",
         selectedQuestionTypes: ["multiple-choice"],
         questionTypes: [{
           value: "multiple-choice",
@@ -313,6 +333,26 @@
           clearInterval(this.timer);
           this.timer = null;
         }
+      },
+      playVideo() {
+        if (!this.youtubeLink || !this.questions[this.currentQuestion]?.time) {
+          console.error("wrong link or timestamp.");
+          return;
+        }
+        // extract the timestamp from the question and remove "s"
+        let seconds = this.questions[this.currentQuestion].time.replace("s", "");
+        // extract video ID
+        let videoIdMatch = this.youtubeLink.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|.*\/|.*embed\/|.*v\/|.*watch\?.*v=))([^&?#]+)/);
+        if (!videoIdMatch) {
+          console.error("wrong link");
+        return;
+        }
+        let videoId = videoIdMatch[1]; // Extract the video ID
+        // makes the embed URL
+        this.videoUrlWithTimestamp = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${seconds}`;
+        // show the modal
+        this.showVideoModal = true;
+        console.log("Opening video", this.videoUrlWithTimestamp, "at", this.questions[this.currentQuestion].time);
       },
       // moves to the next question or finishes the quiz
       nextQuestion() {
@@ -446,4 +486,36 @@
       transform: rotate(360deg);
     }
   }
+
+  /* Video Modal Style */
+.video-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.video-modal-content {
+  position: relative;
+  background: #fff;
+  padding: 35px;
+  border-radius: 5px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.video-close {
+  position: absolute;
+  top: 0px;
+  right: 15px;
+  font-size: 30px;
+  cursor: pointer;
+}
+
 </style>

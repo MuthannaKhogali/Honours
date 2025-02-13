@@ -112,14 +112,16 @@ const generateQuestions = async (transcriptText, numQuestions, questionTypes) =>
                         - If you struggle to create ${numQuestions} generate relevant ones
                         - If the video has an obscure reference do not bring it up in the question, questions should be relevant to the topic
                         - You should NOT generate an example that has been gone over in the video but you shoulde create your own examples that are similar
-                        - When making the question please include in brackets after the question what time this was taking from the video like this [0:52] or [1:21], the time should be in the transcript.
+                        - When making the question please include in when the question was taking from the video like in seconds like "60s" or "115s", the time should be in the transcript.
                         - Even if you generate relevant questions you should say where in the video it would help to answer these questions.
                         - Try to keep the time it was taken from as accurate as possible 
+                        - Do NOT include the time in the question itself anymore
                         Return a JSON list where each question contains:
                             - 'question' (string),
                             - 'type' ('multiple-choice', 'true-false', or 'short-answer'),
                             - 'options' (array of choices, empty for short-answer),
-                            - 'answer' (the correct answer as a string).
+                            - 'answer' (the correct answer as a string),    
+                            - 'time' (time in seconds as a string, e.g., "120s" for 2 minutes). 
                             - DO NOT ADD ANY ADDITIONAL PARAGRAPHS
                         Tips for designing a good question I RECCOMEND you should follow:
                             - Make they are clear, concise and relevant to the video
