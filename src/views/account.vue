@@ -153,7 +153,7 @@
               <strong>Correct Answer:</strong> {{ question.answer }}
             </p>
           </div>
-          <button @click="openSaveModal" class="btn btn-success mt-3" :disabled="quizSaved">Save Quiz</button>
+          <button @click="openSaveModal" class="btn btn-success" :disabled="quizSaved">Save Quiz</button>
           <!-- Save Quiz Modal -->
           <div v-if="showSaveModal" class="modal-overlay">
             <div class="modal-content">
