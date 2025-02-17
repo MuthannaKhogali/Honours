@@ -14,7 +14,7 @@ const {
     registerUser,
     loginUser
 } = require('./auth');
-
+const { saveQuiz } = require("./saveQuestions");
 // enables CORS for all routes
 app.use(cors());
 app.use(express.json()); // parses incoming JSON requests
@@ -70,7 +70,7 @@ const getYouTubeTranscript = async (videoUrl) => {
 };
 
 // generates the questions
-const generateQuestions = async (transcriptText, numQuestions, questionTypes) => {
+const generateQuestions = async (transcriptText, numQuestions, questionTypes, userID, youtubeLink) => {
     try {
         if (!transcriptText) {
             throw new Error('Transcript is empty.');
@@ -157,16 +157,15 @@ app.get('/generate-questions', async (req, res) => {
     const {
         videoUrl,
         numQuestions = 5,
-        questionTypes = ["multiple-choice"]
+        questionTypes = ["multiple-choice"],
+        userID
     } = req.query;
-    if (!videoUrl) {
-        return res.status(400).json({
-            error: 'Video URL is required.'
-        });
+    if (!videoUrl || !userID) {
+        return res.status(400).json({ error: 'Video URL and userID are required.' });
     }
     try {
         const transcript = await getYouTubeTranscript(videoUrl);
-        const questions = await generateQuestions(transcript, parseInt(numQuestions), JSON.parse(questionTypes));
+        const questions = await generateQuestions(transcript, parseInt(numQuestions), JSON.parse(questionTypes), userID, videoUrl);
         res.json({
             transcript,
             questions
@@ -232,6 +231,21 @@ app.post('/validate-answer', async (req, res) => {
     }
 });
 
+app.post('/save-quiz', async (req, res) => {
+    const { userID, youtubeLink, questions, quizName } = req.body;
+
+    if (!userID || !youtubeLink || !questions || !Array.isArray(questions) || !quizName) {
+        return res.status(400).json({ error: 'Missing required fields.' });
+    }
+
+    try {
+        const quizID = await saveQuiz(userID, youtubeLink, questions, quizName);
+        res.json({ message: 'Quiz saved successfully!', quizID });
+    } catch (error) {
+        console.error("Error saving quiz:", error.message);
+        res.status(500).json({ error: 'Error saving quiz to database.' });
+    }
+});
 
 
 app.post('/register', registerUser);

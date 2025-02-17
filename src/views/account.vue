@@ -153,6 +153,19 @@
               <strong>Correct Answer:</strong> {{ question.answer }}
             </p>
           </div>
+          <button @click="openSaveModal" class="btn btn-success mt-3" :disabled="quizSaved">Save Quiz</button>
+          <!-- Save Quiz Modal -->
+          <div v-if="showSaveModal" class="modal-overlay">
+            <div class="modal-content">
+              <span class="close-modal" @click="showSaveModal = false">&times;</span>
+              <h4>Save Quiz</h4>
+              <input v-model="quizName" class="form-control mt-2" placeholder="Enter quiz name" />
+              <button @click="saveQuiz" class="btn btn-success mt-3" :disabled="quizSaved">Save</button>
+              <p v-if="saveMessage" :class="{'text-success': saveSuccess, 'text-danger': !saveSuccess}">
+                {{ saveMessage }}
+              </p>
+            </div>
+          </div>
         </template>
         <!-- Navigation Buttons -->
         <div class="d-flex justify-content-between mt-3" v-if="!quizFinished">
@@ -202,6 +215,11 @@
         numQuestions: 5,
         timeLimit: 120,
         showVideoModal: false,
+        showSaveModal: false,
+        quizName: "",
+        saveMessage: "",
+        saveSuccess: false,
+        quizSaved: false,
         videoUrlWithTimestamp: "",
         selectedQuestionTypes: ["multiple-choice"],
         questionTypes: [{
@@ -275,12 +293,20 @@
         this.quizFinished = false;
         this.answers = [];
         this.answeredQuestions = [];
+        this.quizSaved = false;
+        const userID = localStorage.getItem('userID');
+        if (!userID) {
+        this.errorMessage = "User ID not found. Please log in.";
+        this.loading = false;
+        return;
+        }
         try {
           const response = await axios.get('http://localhost:5000/generate-questions', {
             params: {
               videoUrl: this.youtubeLink,
               numQuestions: this.numQuestions,
               questionTypes: JSON.stringify(this.selectedQuestionTypes),
+              userID: userID
             },
           });
           if (this.timeLimit > 0) {
@@ -293,6 +319,42 @@
         } finally {
           this.loading = false;
         }
+      },
+      async saveQuiz() {
+        if (!this.quizName.trim()) {
+            this.saveMessage = "Quiz name is required";
+            this.saveSuccess = false;
+            return;
+        }
+
+        const userID = localStorage.getItem('userID');
+        if (!userID) {
+            this.saveMessage = "User ID not found. Please log in.";
+            this.saveSuccess = false;
+            return;
+        }
+
+        try {
+            const response = await axios.post('http://localhost:5000/save-quiz', {
+                userID: userID,
+                youtubeLink: this.youtubeLink,
+                questions: this.questions,
+                quizName: this.quizName
+            });
+
+            this.saveMessage = "Successfully saved!";
+            this.saveSuccess = true;
+            this.quizSaved = true;
+        } catch (error) {
+            this.saveMessage = "Error saving quiz.";
+            this.saveSuccess = false;
+        }
+    },
+      openSaveModal() {
+        this.showSaveModal = true;
+        this.quizName = "";
+        this.saveMessage = "";
+        this.saveSuccess = false;
       },
       toggleQuestionType(type) {
         if (this.selectedQuestionTypes.includes(type)) {
@@ -535,5 +597,35 @@
     margin-top: 10px; /* Adds spacing from the question */
   }
 } 
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    text-align: center;
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+}
 
 </style>
