@@ -206,9 +206,10 @@ app.post('/validate-answer', async (req, res) => {
                         If the meaning is similar and the user's response conveys the same key idea, respond with "Correct!".
                         If the response is incorrect or missing critical details, respond with "Incorrect!".
                         
-                         Do NOT include any explanations, examples, or additional text. only respond with "Incorrect!" or "Correct".`
-
-                        
+                        YOU MUST INCLUDE an explanations on why a user got it incorerct if you respond with "Incorrect!" 
+                        Format it like this "Your answer didn't show ect ect ect, the correct answer is"
+                        HOWEVER Do NOT include any explanations, examples, or additional text. If you respond with  "Correct!".`
+  
                     }]
                 }]
             }, 

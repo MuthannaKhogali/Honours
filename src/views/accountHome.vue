@@ -41,8 +41,9 @@
             <div class="card shadow-sm">
               <div class="card-body">
                 <h5 class="card-title">{{ quiz.quizName }}</h5>
-                <p class="card-text"><strong>Video:</strong> <a :href="quiz.youtubeLink" target="_blank">View</a></p>
-                <button @click="reattemptQuiz(quiz)" class="btn btn-primary">Reattempt Quiz</button>
+                <p class="card-text"><strong>Questions:</strong> {{ quiz.questions.length }}</p>
+                <p class="card-text"><strong>Types:</strong> {{ getQuestionTypes(quiz.questions) }}</p>
+                <button @click="openQuizModal(quiz)" class="btn btn-success">View</button>
               </div>
             </div>
           </div>
@@ -51,51 +52,109 @@
 
       <!-- Quiz Modal -->
       <div v-if="showQuizModal" class="modal-overlay">
-        <div class="modal-content">
-          <span class="close-modal" @click="showQuizModal = false">&times;</span>
-          <h4>{{ activeQuiz.quizName }}</h4>
+        <div class="modal-box">
+          <span class="close-modal" @click="closeQuizModal">&times;</span>
 
-          <div v-if="quizFinished">
-            <h3>Quiz Complete!</h3>
-            <h4>Your Score: {{ score }} / {{ activeQuiz.questions.length }}</h4>
-            <button class="btn btn-secondary mt-3" @click="showQuizModal = false">Close</button>
+          <!-- Quiz Details Before Starting -->
+          <div v-if="!quizStarted">
+            <h2 class="modal-title">{{ selectedQuiz.quizName }}</h2>
+            <p><strong>Number of Questions:</strong> {{ selectedQuiz.questions.length }}</p>
+            <p><strong>Types of Questions:</strong> {{ getQuestionTypes(selectedQuiz.questions) }}</p>
+
+            <div class="modal-buttons">
+              <button class="btn btn-primary" @click="reattemptQuiz(selectedQuiz)">Reattempt Quiz</button>
+              <button class="btn btn-warning">Send to Friend</button>
+              <button class="btn btn-danger">Delete Quiz</button>
+            </div>
           </div>
 
+          <!-- If quiz has started, show questions -->
           <div v-else>
-            <p><strong>Question:</strong> {{ activeQuiz.questions[currentQuestion].question }}</p>
+            <div v-if="!quizFinished">
+              <p><strong>Question:</strong> {{ activeQuiz.questions[currentQuestion].question }}</p>
 
-            <!-- Multiple Choice -->
-            <div v-if="activeQuiz.questions[currentQuestion].type === 'multiple-choice'">
-              <button
-                v-for="(option, index) in activeQuiz.questions[currentQuestion].options"
-                :key="index"
-                class="btn btn-secondary m-1"
-                @click="selectAnswer(option)"
-              >
-                {{ option }}
-              </button>
+              <!-- Multiple Choice -->
+              <div v-if="activeQuiz.questions[currentQuestion].type === 'multiple-choice'">
+                <button
+                  v-for="(option, index) in activeQuiz.questions[currentQuestion].options"
+                  :key="index"
+                  class="btn m-1 btn-secondary"
+                  :class="{
+                    'btn-success': feedback !== '' && option === activeQuiz.questions[currentQuestion].answer, // Correct answer is always green
+                    'btn-danger': feedback !== '' && answers[currentQuestion] === option && option !== activeQuiz.questions[currentQuestion].answer // Incorrect selection turns red
+                  }"
+                  :disabled="answers[currentQuestion] !== undefined" 
+                  @click="selectAnswer(option)"
+                  >
+                    {{ option }}
+                </button>
+              </div>
+
+              <!-- True/False -->
+              <div v-if="activeQuiz.questions[currentQuestion].type === 'true-false'">
+                <button 
+                class="btn m-1 btn-secondary"
+                :class="{
+                  'btn-success': feedback !== '' && 'True' === activeQuiz.questions[currentQuestion].answer,
+                  'btn-danger': feedback !== '' && answers[currentQuestion] === 'True' && 'True' !== activeQuiz.questions[currentQuestion].answer
+                }"
+                :disabled="answers[currentQuestion] !== undefined"
+                @click="selectAnswer('True')"
+                >
+                  True
+                </button>
+                <button 
+                class="btn m-1 btn-secondary"
+                :class="{
+                  'btn-success': feedback !== '' && 'False' === activeQuiz.questions[currentQuestion].answer,
+                  'btn-danger': feedback !== '' && answers[currentQuestion] === 'False' && 'False' !== activeQuiz.questions[currentQuestion].answer
+                }"
+                :disabled="answers[currentQuestion] !== undefined"
+                @click="selectAnswer('False')"
+                >
+                  False
+                </button>
+              </div>
+              <!-- Short Answer -->
+              <div v-if="activeQuiz.questions[currentQuestion].type === 'short-answer'">
+                <input 
+                v-model="selectedAnswer" 
+                class="form-control" 
+                placeholder="Type your answer here" 
+                :disabled="answers[currentQuestion] || checkingAnswer" 
+                />
+                <button 
+                  class="btn btn-success mt-2" 
+                  @click="submitShortAnswer" 
+                  :disabled="answers[currentQuestion] !== undefined || checkingAnswer"
+                >
+                  {{ checkingAnswer ? "Checking..." : "Submit" }}
+                </button>
+                <p 
+                  v-if="answers[currentQuestion]?.feedback" 
+                  :class="{
+                    'text-success': answers[currentQuestion].feedback === 'Correct!',
+                    'text-danger': answers[currentQuestion].feedback !== 'Correct!'
+                  }"
+                >
+                  {{ answers[currentQuestion].feedback }}
+                </p>
+              </div>
+              
+              <!-- Navigation Buttons -->
+              <div class="d-flex justify-content-between mt-3">
+                <button class="btn btn-secondary" @click="prevQuestion" :disabled="currentQuestion === 0">Previous</button>
+                <button class="btn btn-secondary" @click="nextQuestion">
+                  {{ currentQuestion === activeQuiz.questions.length - 1 ? 'Finish' : 'Next' }}
+                </button>
+              </div>
             </div>
 
-            <!-- True/False -->
-            <div v-if="activeQuiz.questions[currentQuestion].type === 'true-false'">
-              <button class="btn btn-secondary m-1" @click="selectAnswer('True')">True</button>
-              <button class="btn btn-secondary m-1" @click="selectAnswer('False')">False</button>
-            </div>
-
-            <!-- Short Answer -->
-            <div v-if="activeQuiz.questions[currentQuestion].type === 'short-answer'">
-              <input v-model="selectedAnswer" class="form-control" placeholder="Type your answer here" />
-              <button class="btn btn-success mt-2" @click="submitShortAnswer">Submit</button>
-            </div>
-
-            <p v-if="feedback" class="mt-2">{{ feedback }}</p>
-
-            <!-- Navigation Buttons -->
-            <div class="d-flex justify-content-between mt-3">
-              <button class="btn btn-secondary" @click="prevQuestion" :disabled="currentQuestion === 0">Previous</button>
-              <button class="btn btn-primary" @click="nextQuestion">
-                {{ currentQuestion === activeQuiz.questions.length - 1 ? 'Finish' : 'Next' }}
-              </button>
+            <!-- Quiz Completion -->
+            <div v-if="quizFinished">
+              <h2>Quiz Complete!</h2>
+              <h4>Your Score: {{ score }} / {{ activeQuiz.questions.length }}</h4>
+              <button class="btn btn-secondary mt-3" @click="closeQuizModal">Close</button>
             </div>
           </div>
         </div>
@@ -114,9 +173,12 @@ export default {
       savedQuizzes: [],
       loading: false,
       showQuizModal: false,
+      selectedQuiz: null,
+      quizStarted: false,
       activeQuiz: null,
       currentQuestion: 0,
       selectedAnswer: '',
+      answers: [],
       feedback: '',
       score: 0,
       quizFinished: false
@@ -142,30 +204,104 @@ export default {
         this.loading = false;
       }
     },
+    async submitShortAnswer() {
+  if (!this.selectedAnswer.trim()) return; // Prevent empty submissions
+
+  this.checkingAnswer = true;
+  const userAnswer = this.selectedAnswer.trim();
+  const question = this.activeQuiz.questions[this.currentQuestion].question;
+  const correctAnswer = this.activeQuiz.questions[this.currentQuestion].answer.trim();
+
+  try {
+    const response = await axios.post('http://localhost:5000/validate-answer', {
+      userAnswer,
+      question,
+      correctAnswer
+    });
+
+    const geminiFeedback = response.data.feedback; // Get response from Gemini
+
+    // Store the user's answer and Gemini feedback
+    this.answers[this.currentQuestion] = {
+      userAnswer,
+      feedback: geminiFeedback,
+      correctAnswer
+    };
+
+    // Display feedback immediately
+    this.feedback = geminiFeedback;
+
+    // Update score if correct
+    if (geminiFeedback === 'Correct!') this.score++;
+
+  } catch (error) {
+    this.feedback = 'Error checking answer.';
+  } finally {
+    this.checkingAnswer = false; // Restore button text to "Submit"
+  }
+},
+
+    openQuizModal(quiz) {
+      this.selectedQuiz = quiz;
+      this.showQuizModal = true;
+      this.quizStarted = false;
+    },
+    closeQuizModal() {
+      this.showQuizModal = false;
+      this.quizStarted = false;
+    },
+    getQuestionTypes(questions) {
+      return [...new Set(questions.map(q => q.type))].join(", ");
+    },
     reattemptQuiz(quiz) {
       this.activeQuiz = quiz;
       this.currentQuestion = 0;
+      this.quizStarted = true;
       this.quizFinished = false;
-      this.showQuizModal = true;
+      this.score = 0;
+      this.answers = [];
+      this.feedback = '';
+      this.selectedAnswer = '';
     },
     selectAnswer(option) {
-      this.selectedAnswer = option;
-      this.feedback = option === this.activeQuiz.questions[this.currentQuestion].answer ? 'Correct!' : 'Incorrect!';
-      if (this.feedback === 'Correct!') this.score++;
-    },
-    nextQuestion() {
-      this.currentQuestion++;
-      if (this.currentQuestion >= this.activeQuiz.questions.length) {
-        this.quizFinished = true;
-      }
-    },
-    prevQuestion() {
-      if (this.currentQuestion > 0) this.currentQuestion--;
+  if (!this.answers[this.currentQuestion]) { // Prevent changing answer after selecting
+    this.answers[this.currentQuestion] = option;
+    this.feedback = option === this.activeQuiz.questions[this.currentQuestion].answer ? 'Correct!' : 'Incorrect!';
+    if (this.feedback === 'Correct!') this.score++;
+  }
+},
+nextQuestion() {
+  if (this.currentQuestion < this.activeQuiz.questions.length - 1) {
+    this.currentQuestion++;
+
+    // Load stored answer if available
+    this.selectedAnswer = this.answers[this.currentQuestion]?.userAnswer || '';
+    this.feedback = this.answers[this.currentQuestion]?.feedback || '';
+  } else {
+    this.quizFinished = true;
+  }
+},
+
+prevQuestion() {
+  if (this.currentQuestion > 0) {
+    this.currentQuestion--;
+
+    // Load stored answer if available
+    this.selectedAnswer = this.answers[this.currentQuestion]?.userAnswer || '';
+    this.feedback = this.answers[this.currentQuestion]?.feedback || '';
+  }
+},
+
+    logout() {
+      localStorage.removeItem('username');
+      localStorage.removeItem('userID');
+      this.$router.push('/');
     }
   }
 };
 </script>
-  
+
+
 <style scoped>
 /* Navbar */
 .custom-navbar {
@@ -177,4 +313,89 @@ export default {
   color: white !important;
 }
 
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Darkened background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+/* Centered Modal Box */
+.modal-box {
+  background: white;
+  width: 60%;
+  max-width: 700px;
+  height: 60%;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Close Button */
+.close-modal {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 28px;
+  cursor: pointer;
+  color: #777;
+}
+
+.close-modal:hover {
+  color: #000;
+}
+
+/* Modal Title */
+.modal-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Buttons */
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+/* Fade-in effect */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modal-box {
+    width: 80%;
+    height: 70%;
+  }
+}
 </style>
