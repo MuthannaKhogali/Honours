@@ -6,6 +6,7 @@ import  QuestionView from '@/views/QuestionTest.vue';
 import  TeacherLogin from '@/views/teacherLogin.vue';
 import TeacherAccount from '@/views/teacherAccount.vue';
 import QuizView from '@/views/quiz.vue';
+import ProfileView from '@/views/accountHome.vue';
 
 const routes = [
   {
@@ -46,6 +47,12 @@ const routes = [
     path: '/account', 
     name: 'account', 
     component: AccountView,
+    meta: { requiresAuth: true }
+  },
+  { 
+    path: '/accountHome', 
+    name: 'accountHome', 
+    component: ProfileView,
     meta: { requiresAuth: true }
   },
 ];
