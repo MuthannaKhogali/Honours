@@ -1,5 +1,5 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, PutCommand, QueryCommand, ScanCommand } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBDocumentClient, PutCommand, QueryCommand, ScanCommand, DeleteCommand, BatchWriteCommand } = require("@aws-sdk/lib-dynamodb");
 const crypto = require("crypto");
 
 const client = new DynamoDBClient({ region: "eu-west-2" });
@@ -69,7 +69,6 @@ const getSavedQuizzes = async (userID) => {
     }
 
     try {
-        // Since userID is not the partition key, we must scan the entire table and filter by userID.
         const params = {
             TableName: QUESTIONS_TABLE
         };
@@ -77,14 +76,14 @@ const getSavedQuizzes = async (userID) => {
         const command = new ScanCommand(params);
         const { Items } = await dynamoDB.send(command);
 
-        // Filter results by userID
+        // filter results by userID
         const userQuizzes = Items.filter(q => q.userID === Number(userID));
 
         if (userQuizzes.length === 0) {
             return []; // No quizzes found for the user
         }
 
-        // Group questions by quizID
+        // group questions by quizID
         const groupedQuizzes = userQuizzes.reduce((acc, question) => {
             const quizID = question.quizID;
             if (!acc[quizID]) {
@@ -112,4 +111,56 @@ const getSavedQuizzes = async (userID) => {
     }
 };
 
-module.exports = { saveQuiz, saveQuestions, getSavedQuizzes };
+const deleteQuiz = async (userID, quizID) => {
+    if (!userID || !quizID) {
+      throw new Error("Missing userID or quizID.");
+    }
+  
+    try {
+      console.log(`Searching for questions in quizID: ${quizID} for user: ${userID}`);
+  
+      //find quiz
+      const scanParams = {
+        TableName: QUESTIONS_TABLE,
+        FilterExpression: "quizID = :quizID AND userID = :userID",
+        ExpressionAttributeValues: {
+          ":quizID": quizID,
+          ":userID": Number(userID) 
+        }
+      };
+  
+      const scanCommand = new ScanCommand(scanParams);
+      const { Items } = await dynamoDB.send(scanCommand);
+  
+      if (!Items || Items.length === 0) {
+        console.error("No questions found for quizID:", quizID);
+        return { success: false, message: "No matching quiz found" };
+      }
+  
+      console.log(`Found ${Items.length} questions. Deleting...`);
+  
+      // delete each questions
+      for (const question of Items) {
+        const deleteParams = {
+          TableName: QUESTIONS_TABLE,
+          Key: {
+            questionID: question.questionID, 
+            userID: Number(userID)
+          }
+        };
+  
+        console.log("Deleting question:", deleteParams);
+  
+        const deleteCommand = new DeleteCommand(deleteParams);
+        await dynamoDB.send(deleteCommand);
+      }
+  
+      console.log(`Quiz ${quizID} deleted successfully.`);
+      return { success: true, message: "Quiz deleted successfully" };
+    } catch (error) {
+      console.error("Error deleting quiz:", error);
+      throw new Error("Failed to delete quiz.");
+    }
+  };
+
+module.exports = { saveQuiz, saveQuestions, getSavedQuizzes, deleteQuiz };

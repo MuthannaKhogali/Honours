@@ -16,6 +16,7 @@ const {
 } = require('./auth');
 const { saveQuiz } = require("./saveQuestions");
 const { getSavedQuizzes } = require("./saveQuestions");
+const { deleteQuiz } = require("./saveQuestions"); 
 // enables CORS for all routes
 app.use(cors());
 app.use(express.json()); // parses incoming JSON requests
@@ -264,6 +265,23 @@ app.get('/get-saved-quizzes', async (req, res) => {
         res.status(500).json({ error: "Error fetching saved quizzes." });
     }
 });
+
+app.delete("/delete-quiz", async (req, res) => {
+    try {
+      console.log("DELETE request received:", req.body);
+  
+      const { userID, quizID } = req.body;
+      if (!userID || !quizID) {
+        return res.status(400).json({ success: false, message: "Missing userID or quizID" });
+      }
+  
+      const result = await deleteQuiz(userID, quizID);
+      res.json(result);
+    } catch (error) {
+      console.error("Error deleting quiz:", error);
+      res.status(500).json({ success: false, message: "Failed to delete quiz." });
+    }
+  });
 
 app.post('/register', registerUser);
 app.post('/login', loginUser);

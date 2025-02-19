@@ -64,8 +64,9 @@
             <div class="modal-buttons">
               <button class="btn btn-primary" @click="reattemptQuiz(selectedQuiz)">Reattempt Quiz</button>
               <button class="btn btn-warning">Send to Friend</button>
-              <button class="btn btn-danger">Delete Quiz</button>
+              <button @click="deleteQuiz(selectedQuiz)" class="btn btn-danger">Delete</button>
             </div>
+            <p v-if="quizError" class="text-danger mt-2">{{ quizError }}</p>
           </div>
 
           <!-- If quiz has started, show questions -->
@@ -140,7 +141,7 @@
                   {{ answers[currentQuestion].feedback }}
                 </p>
               </div>
-              
+
               <!-- Navigation Buttons -->
               <div class="d-flex justify-content-between mt-3">
                 <button class="btn btn-secondary" @click="prevQuestion" :disabled="currentQuestion === 0">Previous</button>
@@ -193,53 +194,50 @@ export default {
       this.username = localStorage.getItem('username') || 'USERNAME';
     },
     async fetchSavedQuizzes() {
-      this.loading = true;
-      try {
-        const userID = localStorage.getItem('userID');
-        const response = await axios.get('http://localhost:5000/get-saved-quizzes', { params: { userID } });
-        this.savedQuizzes = response.data.savedQuizzes;
-      } catch (error) {
-        console.error("Error fetching quizzes:", error);
-      } finally {
-        this.loading = false;
-      }
-    },
-    async submitShortAnswer() {
-  if (!this.selectedAnswer.trim()) return; // Prevent empty submissions
-
-  this.checkingAnswer = true;
-  const userAnswer = this.selectedAnswer.trim();
-  const question = this.activeQuiz.questions[this.currentQuestion].question;
-  const correctAnswer = this.activeQuiz.questions[this.currentQuestion].answer.trim();
-
+  this.loading = true;
   try {
-    const response = await axios.post('http://localhost:5000/validate-answer', {
-      userAnswer,
-      question,
-      correctAnswer
-    });
-
-    const geminiFeedback = response.data.feedback; // Get response from Gemini
-
-    // Store the user's answer and Gemini feedback
-    this.answers[this.currentQuestion] = {
-      userAnswer,
-      feedback: geminiFeedback,
-      correctAnswer
-    };
-
-    // Display feedback immediately
-    this.feedback = geminiFeedback;
-
-    // Update score if correct
-    if (geminiFeedback === 'Correct!') this.score++;
-
+    const userID = localStorage.getItem('userID');
+    const response = await axios.get('http://localhost:5000/get-saved-quizzes', { params: { userID } });
+    this.savedQuizzes = response.data.savedQuizzes;
+    console.log("Updated quiz list after deletion:", this.savedQuizzes);
   } catch (error) {
-    this.feedback = 'Error checking answer.';
+    console.error("Error fetching quizzes:", error);
   } finally {
-    this.checkingAnswer = false; // Restore button text to "Submit"
+    this.loading = false;
   }
 },
+async deleteQuiz(quiz) {
+  console.log("Trying to delete quiz:", quiz); // Debugging
+
+  if (!quiz || !quiz.quizID) {
+    this.quizError = "Error: Quiz ID is missing";
+    return;
+  }
+
+  try {
+    const userID = localStorage.getItem('userID');
+
+    console.log("Sending DELETE request with:", { userID, quizID: quiz.quizID });
+
+    const response = await axios.delete("http://localhost:5000/delete-quiz", {
+      data: { userID, quizID: quiz.quizID }, // Ensure correct data is sent
+    });
+
+    console.log("Delete response:", response.data);
+
+    if (response.data.success) {
+      this.closeQuizModal(); // Close the modal on successful deletion
+      this.fetchSavedQuizzes(); // Refresh the quiz list
+      this.quizError = ""; // Clear any previous errors
+    } else {
+      this.quizError = "Error deleting quiz.";
+    }
+  } catch (error) {
+    console.error("Error deleting quiz:", error);
+    this.quizError = "Failed to delete quiz.";
+  }
+},
+
 
     openQuizModal(quiz) {
       this.selectedQuiz = quiz;
