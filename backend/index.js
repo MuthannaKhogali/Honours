@@ -15,6 +15,7 @@ const {
     loginUser
 } = require('./auth');
 const { saveQuiz } = require("./saveQuestions");
+const { getSavedQuizzes } = require("./saveQuestions");
 // enables CORS for all routes
 app.use(cors());
 app.use(express.json()); // parses incoming JSON requests
@@ -247,6 +248,21 @@ app.post('/save-quiz', async (req, res) => {
     }
 });
 
+app.get('/get-saved-quizzes', async (req, res) => {
+    const { userID } = req.query;
+
+    if (!userID) {
+        return res.status(400).json({ error: "User ID is required." });
+    }
+
+    try {
+        const savedQuizzes = await getSavedQuizzes(userID);
+        res.json({ savedQuizzes });
+    } catch (error) {
+        console.error("Error fetching saved quizzes:", error.message);
+        res.status(500).json({ error: "Error fetching saved quizzes." });
+    }
+});
 
 app.post('/register', registerUser);
 app.post('/login', loginUser);

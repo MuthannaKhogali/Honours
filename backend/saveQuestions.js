@@ -1,5 +1,5 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBDocumentClient, PutCommand, QueryCommand, ScanCommand } = require("@aws-sdk/lib-dynamodb");
 const crypto = require("crypto");
 
 const client = new DynamoDBClient({ region: "eu-west-2" });
@@ -16,6 +16,7 @@ const generateQuizID = () => {
     return crypto.randomBytes(6).toString("hex"); // Generate unique hex string for quizID
 };
 
+// function to save questions in DynamoDB
 const saveQuestions = async (questions, userID, youtubeLink, quizName) => {
     if (!questions || !userID || !youtubeLink || !quizName) {
         throw new Error("Missing required fields.");
@@ -25,14 +26,14 @@ const saveQuestions = async (questions, userID, youtubeLink, quizName) => {
 
     try {
         for (const q of questions) {
-            const questionID = await generateQuestionID(); // generate ID for each question
+            const questionID = await generateQuestionID();
 
             const params = {
                 TableName: QUESTIONS_TABLE,
                 Item: {
-                    questionID: Number(questionID), 
+                    questionID: Number(questionID),
                     userID: Number(userID),
-                    quizID, 
+                    quizID,
                     quizName,
                     youtubeLink,
                     question: q.question,
@@ -49,9 +50,9 @@ const saveQuestions = async (questions, userID, youtubeLink, quizName) => {
         }
 
         console.log(`Quiz saved successfully! Quiz ID: ${quizID}`);
-        return quizID; // return quizID so frontend can use it
+        return quizID; // Return quizID so frontend can use it
     } catch (error) {
-        console.error(" DynamoDB Error:", error);
+        console.error("DynamoDB Error:", error);
         throw new Error("Failed to save quiz to DynamoDB.");
     }
 };
@@ -61,5 +62,54 @@ const saveQuiz = async (userID, youtubeLink, questions, quizName) => {
     return await saveQuestions(questions, userID, youtubeLink, quizName);
 };
 
-module.exports = { saveQuiz, saveQuestions };
+// function to get saved quizzes
+const getSavedQuizzes = async (userID) => {
+    if (!userID) {
+        throw new Error("User ID is required.");
+    }
 
+    try {
+        // Since userID is not the partition key, we must scan the entire table and filter by userID.
+        const params = {
+            TableName: QUESTIONS_TABLE
+        };
+
+        const command = new ScanCommand(params);
+        const { Items } = await dynamoDB.send(command);
+
+        // Filter results by userID
+        const userQuizzes = Items.filter(q => q.userID === Number(userID));
+
+        if (userQuizzes.length === 0) {
+            return []; // No quizzes found for the user
+        }
+
+        // Group questions by quizID
+        const groupedQuizzes = userQuizzes.reduce((acc, question) => {
+            const quizID = question.quizID;
+            if (!acc[quizID]) {
+                acc[quizID] = {
+                    quizID: quizID,
+                    quizName: question.quizName,
+                    youtubeLink: question.youtubeLink,
+                    questions: []
+                };
+            }
+            acc[quizID].questions.push({
+                question: question.question,
+                type: question.type,
+                options: question.options,
+                answer: question.answer,
+                time: question.time
+            });
+            return acc;
+        }, {});
+
+        return Object.values(groupedQuizzes);
+    } catch (error) {
+        console.error("Error retrieving saved quizzes:", error);
+        throw new Error("Failed to fetch saved quizzes.");
+    }
+};
+
+module.exports = { saveQuiz, saveQuestions, getSavedQuizzes };
