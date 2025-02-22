@@ -205,7 +205,9 @@ app.post('/validate-answer', async (req, res) => {
                         If the is something question like give an example, mark the user correct if they give any correct example not just one in the correct answer.
       
                         If the meaning is similar and the user's response conveys the same key idea, respond with "Correct!".
+                        If the user does minor spelling mistake do not mark them wrong however if there is multiple spelling mistakes within one answer from the user YOU mark it with "Incorrect!".
                         If the response is incorrect or missing critical details, respond with "Incorrect!".
+
                         
                         YOU MUST INCLUDE an explanations on why a user got it incorerct if you respond with "Incorrect!" 
                         Format it like this "Your answer didn't show ect ect ect, the correct answer is"

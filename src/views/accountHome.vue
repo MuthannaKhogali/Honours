@@ -27,8 +27,13 @@
       <h3>Welcome Back, {{ username }}!</h3>
       <p class="mt-3">
         Want to generate questions?
-        <router-link to="/account" class="btn btn-success">Generate Now</router-link>
       </p>
+      <router-link to="/account" class="btn btn-secondary">Generate Now</router-link>
+
+      <!-- Friends Section -->
+      <div class="mt-5">
+        <h3>Friends</h3>      
+      </div>
 
       <!-- Saved Quizzes Section -->
       <div class="mt-5">
