@@ -17,6 +17,7 @@ const {
 const { saveQuiz } = require("./saveQuestions");
 const { getSavedQuizzes } = require("./saveQuestions");
 const { deleteQuiz } = require("./saveQuestions"); 
+const { sendFriendRequest, acceptFriendRequest, getFriends, removeFriend } = require('./friend');
 // enables CORS for all routes
 app.use(cors());
 app.use(express.json()); // parses incoming JSON requests
@@ -284,6 +285,12 @@ app.delete("/delete-quiz", async (req, res) => {
       res.status(500).json({ success: false, message: "Failed to delete quiz." });
     }
   });
+
+
+app.post("/send-friend-request", sendFriendRequest);
+app.post("/accept-friend-request", acceptFriendRequest);
+app.get("/get-friends", getFriends);
+app.post("/remove-friend", removeFriend);
 
 app.post('/register', registerUser);
 app.post('/login', loginUser);
