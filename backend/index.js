@@ -18,6 +18,7 @@ const { saveQuiz } = require("./saveQuestions");
 const { getSavedQuizzes } = require("./saveQuestions");
 const { deleteQuiz } = require("./saveQuestions"); 
 const { sendFriendRequest, acceptFriendRequest, getFriends, removeFriend } = require('./friend');
+const { sendQuizToFriend, getReceivedQuizzes } = require('./receivedQuestions');
 // enables CORS for all routes
 app.use(cors());
 app.use(express.json()); // parses incoming JSON requests
@@ -294,6 +295,9 @@ app.post("/remove-friend", removeFriend);
 
 app.post('/register', registerUser);
 app.post('/login', loginUser);
+
+app.post('/send-quiz-to-friend', sendQuizToFriend);
+app.get('/get-received-quizzes', getReceivedQuizzes);
 
 // starts the server and listens on the specified port
 app.listen(port, () => {

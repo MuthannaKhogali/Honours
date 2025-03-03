@@ -58,6 +58,26 @@
           </li>
         </ul>
       </div>
+      <div class="mt-5">
+        <h3>Received Quizzes</h3>
+        <div v-if="receivedQuizzes.length === 0" class="text-muted">No received quizzes.</div>
+        <div class="row mt-3">
+          <div class="col-md-4" v-for="quiz in receivedQuizzes" :key="quiz.quizID">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">{{ quiz.quizName }}</h5>
+                <p>
+                  <strong>From:</strong> {{ quiz.senderUsername }}
+                </p>
+                <p>
+                  <strong>Questions:</strong> {{ quiz.questions.length }}
+                </p>
+                <button @click="startReceivedQuiz(quiz)" class="btn btn-primary">Start Quiz</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- Saved Quizzes Section -->
       <div class="mt-5">
         <h3>Saved Quizzes</h3>
@@ -95,8 +115,8 @@
             </p>
             <div class="modal-buttons">
               <button class="btn btn-primary" @click="reattemptQuiz(selectedQuiz)">Reattempt Quiz</button>
-              <button class="btn btn-warning">Send to Friend</button>
-              <button @click="deleteQuiz(selectedQuiz)" class="btn btn-danger">Delete</button>
+              <button class="btn btn-warning" @click="openSendToFriendModal(selectedQuiz)">Send to Friend</button>
+              <button class="btn btn-danger" @click="deleteQuiz(selectedQuiz)">Delete</button>
             </div>
             <p v-if="quizError" class="text-danger mt-2">{{ quizError }}</p>
           </div>
@@ -155,6 +175,24 @@
             </div>
           </div>
         </div>
+        <div v-if="showSendToFriendModal" class="modal-overlay">
+          <div class="modal-box">
+            <h3>Select a Friend to Send Quiz</h3>
+            <ul>
+              <li v-for="friend in friends" :key="friend.friendID">
+                <label>
+                  <input type="radio" :value="friend.friendID" v-model="selectedFriendID" />
+                  {{ friend.username }}
+                </label>
+              </li>
+            </ul>
+            <div class="modal-buttons">
+              <button class="btn btn-success" @click="confirmSendQuiz">Confirm</button>
+              <button class="btn btn-secondary" @click="showSendToFriendModal = false">Cancel</button>
+            </div>
+            <p v-if="sendQuizError" class="text-danger mt-2">{{ sendQuizError }}</p>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -180,13 +218,18 @@
         friendID: "",
         friends: [],
         friendError: "",
-        pendingRequests: []
+        pendingRequests: [],
+        showSendToFriendModal: false,
+        selectedFriendID: null,
+        sendQuizError: '',
+        receivedQuizzes: []
       };
     },
     mounted() {
       this.getUsername();
       this.fetchSavedQuizzes();
       this.getFriends();
+      this.fetchReceivedQuizzes();
     },
     methods: {
       getUsername() {
@@ -306,6 +349,66 @@
       closeQuizModal() {
         this.showQuizModal = false;
         this.quizStarted = false;
+      },
+      openSendToFriendModal(quiz) {
+        this.selectedQuiz = quiz;
+        this.showSendToFriendModal = true;
+        this.selectedFriendID = null;
+        this.sendQuizError = '';
+      },
+      async confirmSendQuiz() {
+        if (!this.selectedFriendID) {
+          this.sendQuizError = "Please select a friend.";
+          return;
+        }
+        try {
+          const payload = {
+            userID: Number(localStorage.getItem('userID')),
+            senderUsername: localStorage.getItem('username'),
+            friendID: this.selectedFriendID,
+            quizID: this.selectedQuiz.quizID,
+            quizName: this.selectedQuiz.quizName,
+            youtubeLink: this.selectedQuiz.youtubeLink,
+            questions: this.selectedQuiz.questions.map(q => ({
+              questionID: q.questionID, 
+              question: q.question,
+              options: q.options,
+              answer: q.answer,
+              time: q.time,
+              type: q.type
+            }))
+          };
+          await axios.post("http://localhost:5000/send-quiz-to-friend", payload);
+          this.showSendToFriendModal = false;
+        } catch (error) {
+          console.error("Error sending quiz:", error);
+          this.sendQuizError = error.response?.data?.error || "Failed to send quiz.";
+        }
+      },
+      async fetchReceivedQuizzes() {
+        const userID = Number(localStorage.getItem('userID'));
+        try {
+          const response = await axios.get('http://localhost:5000/get-received-quizzes', {
+            params: {
+              userID
+            }
+          });
+          this.receivedQuizzes = response.data.receivedQuizzes;
+          console.log("Received quizzes:", this.receivedQuizzes);
+        } catch (error) {
+          console.error("Error fetching received quizzes:", error.response?.data || error);
+        }
+      },
+      startReceivedQuiz(quiz) {
+        this.selectedQuiz = quiz;
+        this.activeQuiz = quiz; 
+        this.quizStarted = true; 
+        this.quizFinished = false; 
+        this.currentQuestion = 0; 
+        this.answers = []; 
+        this.feedback = ''; 
+        this.selectedAnswer = '';
+        this.showQuizModal = true;
       },
       getQuestionTypes(questions) {
         return [...new Set(questions.map(q => q.type))].join(", ");

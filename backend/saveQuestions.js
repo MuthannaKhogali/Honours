@@ -8,12 +8,12 @@ const QUESTIONS_TABLE = "Questions";
 
 // function to generate 6-digit question ID
 const generateQuestionID = async () => {
-    return Math.floor(100000 + Math.random() * 900000); // Random 6-digit number
+    return Math.floor(100000 + Math.random() * 900000); 
 };
 
 // function to generate a quiz ID
 const generateQuizID = () => {
-    return crypto.randomBytes(6).toString("hex"); // Generate unique hex string for quizID
+    return crypto.randomBytes(6).toString("hex");
 };
 
 // function to save questions in DynamoDB
@@ -95,6 +95,7 @@ const getSavedQuizzes = async (userID) => {
                 };
             }
             acc[quizID].questions.push({
+                questionID: question.questionID,
                 question: question.question,
                 type: question.type,
                 options: question.options,
