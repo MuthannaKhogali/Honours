@@ -370,7 +370,7 @@
             quizName: this.selectedQuiz.quizName,
             youtubeLink: this.selectedQuiz.youtubeLink,
             questions: this.selectedQuiz.questions.map(q => ({
-              questionID: q.questionID, 
+              questionID: q.questionID,
               question: q.question,
               options: q.options,
               answer: q.answer,
@@ -401,12 +401,12 @@
       },
       startReceivedQuiz(quiz) {
         this.selectedQuiz = quiz;
-        this.activeQuiz = quiz; 
-        this.quizStarted = true; 
-        this.quizFinished = false; 
-        this.currentQuestion = 0; 
-        this.answers = []; 
-        this.feedback = ''; 
+        this.activeQuiz = quiz;
+        this.quizStarted = true;
+        this.quizFinished = false;
+        this.currentQuestion = 0;
+        this.answers = [];
+        this.feedback = '';
         this.selectedAnswer = '';
         this.showQuizModal = true;
       },
@@ -422,6 +422,35 @@
         this.answers = [];
         this.feedback = '';
         this.selectedAnswer = '';
+      },
+      async submitShortAnswer() {
+        if (!this.selectedAnswer.trim()) return; // Prevent empty submissions
+        this.checkingAnswer = true;
+        const userAnswer = this.selectedAnswer.trim();
+        const question = this.activeQuiz.questions[this.currentQuestion].question;
+        const correctAnswer = this.activeQuiz.questions[this.currentQuestion].answer.trim();
+        try {
+          const response = await axios.post('http://localhost:5000/validate-answer', {
+            userAnswer,
+            question,
+            correctAnswer
+          });
+          const geminiFeedback = response.data.feedback; // Get response from Gemini
+          // Store the user's answer and Gemini feedback
+          this.answers[this.currentQuestion] = {
+            userAnswer,
+            feedback: geminiFeedback,
+            correctAnswer
+          };
+          // Display feedback immediately
+          this.feedback = geminiFeedback;
+          // Update score if correct
+          if (geminiFeedback === 'Correct!') this.score++;
+        } catch (error) {
+          this.feedback = 'Error checking answer.';
+        } finally {
+          this.checkingAnswer = false; // Restore button text to "Submit"
+        }
       },
       selectAnswer(option) {
         if (!this.answers[this.currentQuestion]) { // Prevent changing answer after selecting
