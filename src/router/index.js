@@ -7,6 +7,9 @@ import  TeacherLogin from '@/views/teacherLogin.vue';
 import TeacherAccount from '@/views/teacherAccount.vue';
 import QuizView from '@/views/quiz.vue';
 import ProfileView from '@/views/accountHome.vue';
+import RealAccountHome from '@/views/realAccountHome.vue';
+import friends from '@/views/friends.vue';
+import quizzes from '@/views/quizzes.vue';
 
 const routes = [
   {
@@ -53,6 +56,24 @@ const routes = [
     path: '/accountHome', 
     name: 'accountHome', 
     component: ProfileView,
+    meta: { requiresAuth: true }
+  },
+  { 
+    path: '/realaccountHome', 
+    name: 'realaccountHome', 
+    component: RealAccountHome,
+    meta: { requiresAuth: true }
+  },
+  { 
+    path: '/friends', 
+    name: 'friends', 
+    component: friends,
+    meta: { requiresAuth: true }
+  },
+  { 
+    path: '/quizzes', 
+    name: 'quizzes', 
+    component: quizzes,
     meta: { requiresAuth: true }
   },
 ];
