@@ -35,7 +35,7 @@
               <div class="quiz-card" v-for="quiz in receivedQuizzes" :key="quiz.quizID">
                 <h4>{{ quiz.quizName }}</h4>
                 <p><strong>From:</strong> {{ quiz.senderUsername }}</p>
-                <button @click="startQuiz(quiz)" class="btn btn-primary">Start Quiz</button>
+                <button @click="startQuiz(quiz)" class="btn btn-purple">Start Quiz</button>
               </div>
             </div>
           </section>
@@ -147,12 +147,11 @@
     padding: 2rem;
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 0;
   }
   
   .left-content {
     width: 100%;
-    max-width: 600px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -187,7 +186,6 @@
   .quiz-card h4 {
     margin: 0 0 0.5rem;
     font-size: 1.1rem;
-    color: rgb(138, 0, 183);
   }
   
   /* Empty State */

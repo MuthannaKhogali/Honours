@@ -146,7 +146,7 @@
     padding: 2rem;
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 0;
   }
   
   /* Left Content (Everything moves left) */
@@ -175,7 +175,7 @@
     flex: 1;
     padding: 9px;
     font-size: 1rem;
-    border: 1px solid rgb(138, 0, 183);
+    border: 1px solid rgb(0, 0, 0);
     border-radius: 5px;
   }
   
