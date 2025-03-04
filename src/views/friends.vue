@@ -175,7 +175,6 @@
     flex: 1;
     padding: 9px;
     font-size: 1rem;
-    border: 1px solid rgb(0, 0, 0);
     border-radius: 5px;
   }
   
@@ -197,11 +196,10 @@
   /* Friend Card */
   .friend-card {
     background: white;
-    border: 1px solid rgb(138, 0, 183);
     padding: 1rem;
     border-radius: 8px;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
   }
   
   /* Align buttons side by side */

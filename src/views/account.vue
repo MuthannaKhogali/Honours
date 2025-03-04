@@ -372,8 +372,8 @@ export default {
 .quick-card {
   background-color: #ffffff;
   padding: 1rem;
-  border: 1px solid rgb(138, 0, 183);
   border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
   text-decoration: none;
   color: rgb(0, 0, 0);

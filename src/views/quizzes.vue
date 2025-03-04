@@ -388,7 +388,6 @@
   /* Quiz Card */
   .quiz-card {
     background: white;
-    border: 1px solid rgb(138, 0, 183);
     padding: 1rem;
     border-radius: 8px;
     text-align: center;
