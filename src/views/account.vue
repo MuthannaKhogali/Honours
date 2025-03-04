@@ -11,9 +11,9 @@
       </div>
     </section>
 
-    <!-- Quick Links Section -->
+    <!-- Links Section -->
     <section class="quick-links">
-      <h2>Quick Access</h2>
+      <h2>Explore</h2>
       <div class="quick-links-grid">
         <router-link to="/generateQuestions" class="quick-card">
           <h4>Generate Quiz</h4>
