@@ -251,7 +251,7 @@
     
   .friend-card h4 {
     margin: 0 0 0.5rem;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
   
   /* Responsive */
