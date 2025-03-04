@@ -42,116 +42,100 @@
         </div>
       </div>
   
-      <!-- Quiz Modal (From Home Page) -->
       <div v-if="showQuizModal" class="modal-overlay">
-        <div class="modal-box">
-          <span class="close-modal" @click="closeQuizModal">&times;</span>
-          <div v-if="!quizStarted">
-            <h2>{{ selectedQuiz.quizName }}</h2>
-            <p><strong>Questions:</strong> {{ selectedQuiz.questions.length }}</p>
-            <p><strong>Types:</strong> {{ getQuestionTypes(selectedQuiz.questions) }}</p>
-            <div class="modal-buttons">
-              <button class="btn btn-purple" @click="reattemptQuiz(selectedQuiz)">Reattempt</button>
-              <button class="btn btn-purple" @click="openSendToFriendModal(selectedQuiz)">Send to Friend</button>
-              <button class="btn btn-purple" @click="deleteQuiz(selectedQuiz)">Delete</button>
-            </div>
+      <div class="modal-box">
+        <span class="close-modal" @click="closeQuizModal">&times;</span>
+        <!-- Quiz Details Before Starting -->
+        <div v-if="!quizStarted">
+          <h2 class="modal-title">{{ selectedQuiz.quizName }}</h2>
+          <p>
+            <strong>Number of Questions:</strong> {{ selectedQuiz.questions.length }}
+          </p>
+          <p>
+            <strong>Types of Questions:</strong> {{ getQuestionTypes(selectedQuiz.questions) }}
+          </p>
+          <div class="modal-buttons">
+            <button class="btn btn-purple" @click="reattemptQuiz(selectedQuiz)">Reattempt Quiz</button>
+            <button class="btn btn-purple" @click="openSendToFriendModal(selectedQuiz)">Send to Friend</button>
+            <button class="btn btn-purple" @click="deleteQuiz(selectedQuiz)">Delete</button>
           </div>
-          <div v-if="showQuizModal" class="modal-overlay">
-        <div class="modal-box">
-          <span class="close-modal" @click="closeQuizModal">&times;</span>
-          <!-- Quiz Details Before Starting -->
-          <div v-if="!quizStarted">
-            <h2 class="modal-title">{{ selectedQuiz.quizName }}</h2>
+          <p v-if="quizError" class="text-danger mt-2">{{ quizError }}</p>
+        </div>
+        <!-- If quiz has started, show questions -->
+        <div v-else>
+          <div v-if="!quizFinished">
             <p>
-              <strong>Number of Questions:</strong> {{ selectedQuiz.questions.length }}
+              <strong>Question:</strong> {{ activeQuiz.questions[currentQuestion].question }}
             </p>
-            <p>
-              <strong>Types of Questions:</strong> {{ getQuestionTypes(selectedQuiz.questions) }}
-            </p>
-            <div class="modal-buttons">
-              <button class="btn btn-purple" @click="reattemptQuiz(selectedQuiz)">Reattempt Quiz</button>
-              <button class="btn btn-purple" @click="openSendToFriendModal(selectedQuiz)">Send to Friend</button>
-              <button class="btn btn-purple" @click="deleteQuiz(selectedQuiz)">Delete</button>
-            </div>
-            <p v-if="quizError" class="text-danger mt-2">{{ quizError }}</p>
-          </div>
-          <!-- If quiz has started, show questions -->
-          <div v-else>
-            <div v-if="!quizFinished">
-              <p>
-                <strong>Question:</strong> {{ activeQuiz.questions[currentQuestion].question }}
-              </p>
-              <!-- Multiple Choice -->
-              <div v-if="activeQuiz.questions[currentQuestion].type === 'multiple-choice'">
-                <button v-for="(option, index) in activeQuiz.questions[currentQuestion].options" :key="index" class="btn m-1 btn-secondary" :class="{
+            <!-- Multiple Choice -->
+            <div v-if="activeQuiz.questions[currentQuestion].type === 'multiple-choice'">
+              <button v-for="(option, index) in activeQuiz.questions[currentQuestion].options" :key="index" class="btn m-1 btn-secondary" :class="{
                     'btn-success': feedback !== '' && option === activeQuiz.questions[currentQuestion].answer, // Correct answer is always green
                     'btn-danger': feedback !== '' && answers[currentQuestion] === option && option !== activeQuiz.questions[currentQuestion].answer // Incorrect selection turns red
                   }" :disabled="answers[currentQuestion] !== undefined" @click="selectAnswer(option)">
-                  {{ option }}
-                </button>
-              </div>
-              <!-- True/False -->
-              <div v-if="activeQuiz.questions[currentQuestion].type === 'true-false'">
-                <button class="btn m-1 btn-secondary" :class="{
+                {{ option }}
+              </button>
+            </div>
+            <!-- True/False -->
+            <div v-if="activeQuiz.questions[currentQuestion].type === 'true-false'">
+              <button class="btn m-1 btn-secondary" :class="{
                   'btn-success': feedback !== '' && 'True' === activeQuiz.questions[currentQuestion].answer,
                   'btn-danger': feedback !== '' && answers[currentQuestion] === 'True' && 'True' !== activeQuiz.questions[currentQuestion].answer
                 }" :disabled="answers[currentQuestion] !== undefined" @click="selectAnswer('True')"> True </button>
-                <button class="btn m-1 btn-secondary" :class="{
+              <button class="btn m-1 btn-secondary" :class="{
                   'btn-success': feedback !== '' && 'False' === activeQuiz.questions[currentQuestion].answer,
                   'btn-danger': feedback !== '' && answers[currentQuestion] === 'False' && 'False' !== activeQuiz.questions[currentQuestion].answer
                 }" :disabled="answers[currentQuestion] !== undefined" @click="selectAnswer('False')"> False </button>
-              </div>
-              <!-- Short Answer -->
-              <div v-if="activeQuiz.questions[currentQuestion].type === 'short-answer'">
-                <input v-model="selectedAnswer" class="form-control" placeholder="Type your answer here" :disabled="answers[currentQuestion] || checkingAnswer" />
-                <button class="btn btn-success mt-2" @click="submitShortAnswer" :disabled="answers[currentQuestion] !== undefined || checkingAnswer">
-                  {{ checkingAnswer ? "Checking..." : "Submit" }}
-                </button>
-                <p v-if="answers[currentQuestion]?.feedback" :class="{
+            </div>
+            <!-- Short Answer -->
+            <div v-if="activeQuiz.questions[currentQuestion].type === 'short-answer'">
+              <input v-model="selectedAnswer" class="form-control" placeholder="Type your answer here" :disabled="answers[currentQuestion] || checkingAnswer" />
+              <button class="btn btn-success mt-2" @click="submitShortAnswer" :disabled="answers[currentQuestion] !== undefined || checkingAnswer">
+                {{ checkingAnswer ? "Checking..." : "Submit" }}
+              </button>
+              <p v-if="answers[currentQuestion]?.feedback" :class="{
                     'text-success': answers[currentQuestion].feedback === 'Correct!',
                     'text-danger': answers[currentQuestion].feedback !== 'Correct!'
                   }">
-                  {{ answers[currentQuestion].feedback }}
-                </p>
-              </div>
-              <!-- Navigation Buttons -->
-              <div class="d-flex justify-content-between mt-3">
-                <button class="btn btn-secondary" @click="prevQuestion" :disabled="currentQuestion === 0">Previous</button>
-                <button class="btn btn-purple" @click="nextQuestion">
-                  {{ currentQuestion === activeQuiz.questions.length - 1 ? 'Finish' : 'Next' }}
-                </button>
-              </div>
+                {{ answers[currentQuestion].feedback }}
+              </p>
             </div>
-            <!-- Quiz Completion -->
-            <div v-if="quizFinished">
-              <h2>Quiz Complete!</h2>
-              <h4>Your Score: {{ score }} / {{ activeQuiz.questions.length }}</h4>
-              <button class="btn btn-purple mt-3" @click="closeQuizModal">Close</button>
+            <!-- Navigation Buttons -->
+            <div class="d-flex justify-content-between mt-3">
+              <button class="btn btn-secondary" @click="prevQuestion" :disabled="currentQuestion === 0">Previous</button>
+              <button class="btn btn-purple" @click="nextQuestion">
+                {{ currentQuestion === activeQuiz.questions.length - 1 ? 'Finish' : 'Next' }}
+              </button>
             </div>
           </div>
-        </div>
-        <div v-if="showSendToFriendModal" class="modal-overlay">
-          <div class="modal-box">
-            <h3>Select a Friend to Send Quiz</h3>
-            <ul>
-              <li v-for="friend in friends" :key="friend.friendID">
-                <label>
-                  <input type="radio" :value="friend.friendID" v-model="selectedFriendID" />
-                  {{ friend.username }}
-                </label>
-              </li>
-            </ul>
-            <div class="modal-buttons">
-              <button class="btn btn-purple" @click="confirmSendQuiz">Confirm</button>
-              <button class="btn btn-secondary" @click="showSendToFriendModal = false">Cancel</button>
-            </div>
-            <p v-if="sendQuizError" class="text-danger mt-2">{{ sendQuizError }}</p>
+          <!-- Quiz Completion -->
+          <div v-if="quizFinished">
+            <h2>Quiz Complete!</h2>
+            <h4>Your Score: {{ score }} / {{ activeQuiz.questions.length }}</h4>
+            <button class="btn btn-purple mt-3" @click="closeQuizModal">Close</button>
           </div>
         </div>
       </div>
-      </div>
+      <div v-if="showSendToFriendModal" class="modal-overlay">
+        <div class="modal-box">
+          <h3>Select a Friend to Send Quiz</h3>
+          <ul>
+            <li v-for="friend in friends" :key="friend.friendID">
+              <label>
+                <input type="radio" :value="friend.friendID" v-model="selectedFriendID" />
+                {{ friend.username }}
+              </label>
+            </li>
+          </ul>
+          <div class="modal-buttons">
+            <button class="btn btn-purple" @click="confirmSendQuiz">Confirm</button>
+            <button class="btn btn-secondary" @click="showSendToFriendModal = false">Cancel</button>
+          </div>
+          <p v-if="sendQuizError" class="text-danger mt-2">{{ sendQuizError }}</p>
+        </div>
       </div>
     </div>
+  </div>
   </template>
   
   <script>
@@ -161,6 +145,7 @@
     data() {
       return {
         userID: Number(localStorage.getItem('userID')),
+        username: localStorage.getItem('username') || '',
         savedQuizzes: [],
         receivedQuizzes: [],
         loading: false,
@@ -174,6 +159,10 @@
         selectedAnswer: '',
         feedback: '',
         score: 0,
+        friends: [],             
+        selectedFriendID: null,    
+        sendQuizError: '',  
+        
       };
     },
     mounted() {
@@ -191,7 +180,7 @@
         const response = await axios.get("http://localhost:5000/get-received-quizzes", { params: { userID: this.userID } });
         this.receivedQuizzes = response.data.receivedQuizzes;
       },
- openQuizModal(quiz) {
+    openQuizModal(quiz) {
       this.selectedQuiz = quiz;
       this.activeQuiz = quiz;
       this.quizStarted = false;
@@ -201,9 +190,11 @@
       this.selectedAnswer = '';
       this.feedback = '';
       this.showQuizModal = true;
+      this.showSendToFriendModal = false; 
     },
     closeQuizModal() {
       this.showQuizModal = false;
+      this.showSendToFriendModal = false; 
     },
     reattemptQuiz(quiz) {
       this.activeQuiz = quiz;
@@ -278,11 +269,19 @@
         this.quizError = 'Failed to delete quiz.';
       }
     },
-    openSendToFriendModal(quiz) {
-      this.selectedQuiz = quiz;
-      this.showSendToFriendModal = true;
-      this.selectedFriendID = null;
-      this.sendQuizError = '';
+    async openSendToFriendModal(quiz) {
+        this.selectedQuiz = quiz;
+        this.showSendToFriendModal = true;
+        this.selectedFriendID = null;
+        this.sendQuizError = '';
+
+        try {
+            const response = await axios.get("http://localhost:5000/get-friends", { params: { userID: this.userID } });
+            this.friends = response.data.friends || [];
+        } catch (error) {
+            console.error("Failed to fetch friends:", error);
+            this.sendQuizError = "Failed to load friends.";
+        }
     },
     async confirmSendQuiz() {
       if (!this.selectedFriendID) {
