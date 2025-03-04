@@ -5,7 +5,7 @@
         <div class="hero-content">
           <h1>Friends</h1>
           <p>Manage your friends, requests, and connections.</p>
-          <router-link to="/realaccountHome" class="back-button">Home</router-link>
+          <router-link to="/account" class="back-button">Home</router-link>
         </div>
       </section>
   
@@ -44,7 +44,7 @@
             <div class="friend-grid">
               <div v-for="friend in friends" :key="friend.friendID" class="friend-card small-card">
                 <h4 class="mb-4 mt-3">{{ friend.username }}</h4>
-                <button @click="removeFriend(friend.friendID)" class="btn btn-danger btn-sm">Remove</button>
+                <button @click="removeFriend(friend.friendID)" class="btn btn-purple btn-sm">Remove</button>
               </div>
             </div>
           </section>
@@ -164,10 +164,6 @@
     margin-bottom: 2rem;
   }
   
-  .add-friend h2 {
-    color: rgb(138, 0, 183);
-  }
-  
   .add-friend-box {
     display: flex;
     align-items: center;
@@ -188,10 +184,6 @@
   .friends-list {
     width: 100%;
     margin-bottom: 2rem;
-  }
-  
-  h2 {
-    color: rgb(138, 0, 183);
   }
   
   /* Friend Grid */
@@ -253,13 +245,13 @@
   .btn-purple:hover {
     background: rgb(118, 0, 160);
     transform: translateY(-2px);
+    color: white;
   }
 
     
   .friend-card h4 {
     margin: 0 0 0.5rem;
     font-size: 1.3rem;
-    color: rgb(138, 0, 183);
   }
   
   /* Responsive */

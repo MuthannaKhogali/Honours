@@ -133,7 +133,6 @@ const acceptFriendRequest = async (req, res) => {
 // get users friends
 const getFriends = async (req, res) => {
     let { userID } = req.query;
-    console.log("Fetching friends for user:", userID);
 
     userID = Number(userID); // convert userID to number
 
@@ -149,8 +148,6 @@ const getFriends = async (req, res) => {
             KeyConditionExpression: "userID = :userID",
             ExpressionAttributeValues: { ":userID": userID }
         }));
-
-        console.log("Friends found:", result.Items);
 
         if (!result.Items.length) {
             return res.json({ friends: [], pendingRequests: [] });

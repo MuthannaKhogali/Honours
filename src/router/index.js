@@ -1,13 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@/views/home.vue';
 import LoginView from '@/views/login.vue';
-import AccountView from '@/views/account.vue';
+import GenerateView from '@/views/generateQuestion.vue';
 import  QuestionView from '@/views/QuestionTest.vue';
-import  TeacherLogin from '@/views/teacherLogin.vue';
-import TeacherAccount from '@/views/teacherAccount.vue';
-import QuizView from '@/views/quiz.vue';
 import ProfileView from '@/views/accountHome.vue';
-import RealAccountHome from '@/views/realAccountHome.vue';
+import RealAccountHome from '@/views/account.vue';
 import friends from '@/views/friends.vue';
 import quizzes from '@/views/quizzes.vue';
 
@@ -27,29 +24,14 @@ const routes = [
     component: LoginView
   },
   { 
-    path: '/quiz', 
-    name: 'quiz', 
-    component: QuizView
-  },
-  { 
     path: '/QuestionTest', 
     name: 'QuestionTest', 
     component: QuestionView
   },
   { 
-    path: '/teacherLogin', 
-    name: 'teacherLogin', 
-    component: TeacherLogin
-  },
-  { 
-    path: '/teacherAccount', 
-    name: 'teacherAccount', 
-    component: TeacherAccount
-  },
-  { 
-    path: '/account', 
-    name: 'account', 
-    component: AccountView,
+    path: '/generateQuestions', 
+    name: 'generateQuestions', 
+    component: GenerateView,
     meta: { requiresAuth: true }
   },
   { 
@@ -59,8 +41,8 @@ const routes = [
     meta: { requiresAuth: true }
   },
   { 
-    path: '/realaccountHome', 
-    name: 'realaccountHome', 
+    path: '/account', 
+    name: 'account', 
     component: RealAccountHome,
     meta: { requiresAuth: true }
   },

@@ -6,7 +6,7 @@
           <h1>My Quizzes</h1>
           <p>View and manage your saved quizzes.</p>
           <div class="header-buttons">
-            <router-link to="/realaccountHome" class="back-button">Home</router-link>
+            <router-link to="/account" class="back-button">Home</router-link>
           </div>
         </div>
       </section>
@@ -165,10 +165,6 @@
     margin-bottom: 2rem;
   }
   
-  h2 {
-    color: rgb(138, 0, 183);
-  }
-  
   /* Quiz Grid */
   .quiz-grid {
     display: flex;
@@ -220,6 +216,7 @@
   .btn-purple:hover {
     background: rgb(118, 0, 160);
     transform: translateY(-2px);
+    color: white;
   }
   
   .btn-danger {
