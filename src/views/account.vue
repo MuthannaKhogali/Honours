@@ -175,8 +175,6 @@ export default {
   mounted() {
     this.getUsername();
     this.fetchSavedQuizzes();
-    this.getFriends();
-    this.fetchReceivedQuizzes();
   },
   methods: {
     getUsername() {
@@ -194,57 +192,6 @@ export default {
       } finally {
         this.loading = false;
       }
-    },
-    async fetchReceivedQuizzes() {
-      try {
-        const response = await axios.get('http://localhost:5000/get-received-quizzes', {
-          params: { userID: this.userID }
-        });
-        this.receivedQuizzes = response.data.receivedQuizzes;
-      } catch (error) {
-        console.error('Error fetching received quizzes:', error);
-      }
-    },
-    async getFriends() {
-      try {
-        const response = await axios.get('http://localhost:5000/get-friends', {
-          params: { userID: this.userID }
-        });
-        this.friends = response.data.friends;
-        this.pendingRequests = response.data.pendingRequests;
-      } catch (error) {
-        console.error('Error fetching friends:', error);
-      }
-    },
-    async sendFriendRequest() {
-      if (!this.friendUsername.trim()) {
-        this.friendError = 'Please enter a valid username.';
-        return;
-      }
-      try {
-        await axios.post('http://localhost:5000/send-friend-request', {
-          userID: this.userID,
-          friendUsername: this.friendUsername.trim()
-        });
-        this.friendUsername = '';
-        this.getFriends();
-      } catch (error) {
-        this.friendError = error.response?.data?.error || 'Failed to send friend request.';
-      }
-    },
-    async acceptFriend(friendID) {
-      await axios.post('http://localhost:5000/accept-friend-request', {
-        userID: this.userID,
-        friendID
-      });
-      this.getFriends();
-    },
-    async removeFriend(friendID) {
-      await axios.post('http://localhost:5000/remove-friend', {
-        userID: this.userID,
-        friendID
-      });
-      this.getFriends();
     },
     openQuizModal(quiz) {
       this.selectedQuiz = quiz;
