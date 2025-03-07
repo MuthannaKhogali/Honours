@@ -123,6 +123,7 @@ const generateQuestions = async (transcriptText, numQuestions, questionTypes, us
                         Return a JSON list where each question contains:
                             - 'question' (string),
                             - 'type' ('multiple-choice', 'true-false', or 'short-answer'),
+                            - THE TYPE MUST BE ('multiple-choice', 'true-false', or 'short-answer'),
                             - 'options' (array of choices, empty for short-answer),
                             - 'answer' (the correct answer as a string),    
                             - 'time' (time in seconds as a string, e.g., "120s" for 2 minutes). 

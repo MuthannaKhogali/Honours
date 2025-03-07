@@ -3,7 +3,7 @@
     <!-- Full-width Purple Hero Section -->
     <section class="hero">
       <div class="hero-content">
-        <h1>Welcome back, {{ username }}!</h1>
+        <h1>Welcome Back, {{ username }}</h1>
         <p>Your personal quiz and study hub.</p>
         <div class="hero-buttons">
           <button @click="logout" class="btn btn-outline-purple">Log Out</button>
