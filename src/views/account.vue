@@ -1,6 +1,5 @@
 <template>
   <div class="home-container">
-    <!-- Full-width Purple Hero Section -->
     <section class="hero">
       <div class="hero-content">
         <h1>Welcome Back, {{ username }}</h1>
@@ -114,11 +113,11 @@
               <strong>Question:</strong> {{ activeQuiz.questions[currentQuestion].question }}
             </p>
             <!-- Multiple Choice -->
-            <div v-if="activeQuiz.questions[currentQuestion].type === 'multiple-choice'">
-              <button v-for="(option, index) in activeQuiz.questions[currentQuestion].options" :key="index" class="btn m-1 btn-secondary" :class="{
-                    'btn-success': feedback !== '' && option === activeQuiz.questions[currentQuestion].answer, // Correct answer is always green
-                    'btn-danger': feedback !== '' && answers[currentQuestion] === option && option !== activeQuiz.questions[currentQuestion].answer // Incorrect selection turns red
-                  }" :disabled="answers[currentQuestion] !== undefined" @click="selectAnswer(option)">
+            <div v-if="activeQuiz.questions[currentQuestion].type === 'multiple-choice'" class="multiple-choice-options">
+              <button v-for="(option, index) in activeQuiz.questions[currentQuestion].options" :key="index" class="btn btn-secondary" :class="{
+      'btn-success': feedback !== '' && option === activeQuiz.questions[currentQuestion].answer,
+      'btn-danger': feedback !== '' && answers[currentQuestion] === option && option !== activeQuiz.questions[currentQuestion].answer
+    }" :disabled="answers[currentQuestion] !== undefined" @click="selectAnswer(option)">
                 {{ option }}
               </button>
             </div>
@@ -147,7 +146,7 @@
               </p>
             </div>
             <!-- Navigation Buttons -->
-            <div class="d-flex justify-content-between mt-3">
+            <div class="nav-buttons">
               <button class="btn btn-secondary" @click="prevQuestion" :disabled="currentQuestion === 0">Previous</button>
               <button class="btn btn-purple" @click="nextQuestion">
                 {{ currentQuestion === activeQuiz.questions.length - 1 ? 'Finish' : 'Next' }}
@@ -305,7 +304,7 @@
           answer: 'Option 1',
           expanded: true
         };
-        newQuestion.answer = newQuestion.options[0]; 
+        newQuestion.answer = newQuestion.options[0];
         this.editableQuestions.push(newQuestion);
       },
       changeQuestionType(index, newType) {
@@ -315,10 +314,10 @@
           question.options = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
           question.answer = 'Option 1';
         } else if (newType === 'true-false') {
-          question.options = []; 
+          question.options = [];
           question.answer = 'True';
         } else if (newType === 'short-answer') {
-          question.options = []; 
+          question.options = [];
           question.answer = '';
         }
       },
@@ -611,6 +610,35 @@
   .scrollable-modal {
     overflow-y: auto;
     max-height: 80vh;
+  }
+
+  /* Ensure the options are stacked vertically and same width */
+  .multiple-choice-options {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    /* spacing between options */
+    width: 100%;
+  }
+
+  .multiple-choice-options button {
+    width: 100%;
+    text-align: left;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+
+  /* Ensure navigation buttons are inside the modal and don't overflow */
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+    width: 100%;
+  }
+
+  .nav-buttons button {
+    padding: 12px 20px;
   }
 
   .question-box {
