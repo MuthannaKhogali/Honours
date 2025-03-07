@@ -56,7 +56,54 @@
           <div class="modal-buttons">
             <button class="btn btn-purple" @click="reattemptQuiz(selectedQuiz)">Reattempt Quiz</button>
             <button class="btn btn-purple" @click="openSendToFriendModal(selectedQuiz)">Send to Friend</button>
+            <button @click="openEditModal(selectedQuiz)" class="btn btn-purple">Edit</button>
             <button class="btn btn-purple" @click="deleteQuiz(selectedQuiz)">Delete</button>
+          </div>
+          <div v-if="showEditModal" class="modal-overlay">
+            <div class="modal-box scrollable-modal">
+              <span class="close-modal" @click="closeEditModal">&times;</span>
+              <h2>Edit Quiz - {{ selectedQuiz.quizName }}</h2>
+              <div class="edit-questions">
+                <div v-for="(question, index) in editableQuestions" :key="index" class="question-box">
+                  <!-- Clickable box with shadow -->
+                  <div class="question-header" @click="toggleQuestionVisibility(index)">
+                    <p>{{ question.question }}</p>
+                  </div>
+                  <!-- Expanded area for editing -->
+                  <div v-if="question.expanded" class="question-editor">
+                    <input v-model="question.question" placeholder="Edit question text" class="form-control" />
+                    <select v-model="question.type" @change="changeQuestionType(index, question.type)" class="form-control mt-2">
+                      <option value="multiple-choice">Multiple Choice</option>
+                      <option value="true-false">True/False</option>
+                      <option value="short-answer">Short Answer</option>
+                    </select>
+                    <!-- Multiple Choice Editing -->
+                    <div v-if="question.type === 'multiple-choice'">
+                      <div v-for="(option, i) in question.options" :key="i" class="option-item">
+                        <input v-model="question.options[i]" placeholder="Option" class="form-control option-input" />
+                        <input type="radio" :value="option" v-model="question.answer" /> Correct
+                      </div>
+                    </div>
+                    <!-- True/False Editing -->
+                    <div v-if="question.type === 'true-false'">
+                      <label>
+                        <input type="radio" value="True" v-model="question.answer" /> True </label>
+                      <label>
+                        <input type="radio" value="False" v-model="question.answer" /> False </label>
+                    </div>
+                    <!-- Short Answer Editing -->
+                    <div v-if="question.type === 'short-answer'">
+                      <input v-model="question.answer" placeholder="Correct Answer" class="form-control" />
+                    </div>
+                    <button class="btn btn-danger btn-sm mt-2" @click="deleteQuestion(index)">Delete Question</button>
+                  </div>
+                </div>
+                <button class="btn btn-purple m-2" @click="addNewQuestion">Add New Question</button>
+                <button class="btn btn-purple m-2" @click="saveQuizChanges">Save Changes</button>
+                <button class="btn btn-secondary m-2" @click="closeEditModal">Cancel</button>
+              </div>
+              <p v-if="editError" class="text-danger">{{ editError }}</p>
+            </div>
           </div>
           <p v-if="quizError" class="text-danger mt-2">{{ quizError }}</p>
         </div>
@@ -162,6 +209,9 @@
         friendError: '',
         quizError: '',
         sendQuizError: '',
+        showEditModal: false,
+        editableQuestions: [],
+        editError: '',
         selectedFriendID: null,
         checkingAnswer: false,
         userID: Number(localStorage.getItem('userID')) || null
@@ -203,6 +253,74 @@
       },
       closeQuizModal() {
         this.showQuizModal = false;
+      },
+      openEditModal(quiz) {
+        this.showEditModal = true;
+        this.editableQuestions = quiz.questions.map(q => ({
+          questionID: q.questionID,
+          question: q.question,
+          type: q.type,
+          options: q.options ? [...q.options] : [],
+          answer: q.answer,
+          time: q.time,
+          expanded: false
+        }));
+      },
+      closeEditModal() {
+        this.showEditModal = false;
+        this.editableQuestions = [];
+      },
+      async saveQuizChanges() {
+        try {
+          const payload = {
+            userID: this.userID,
+            quizID: this.selectedQuiz.quizID,
+            questions: this.editableQuestions
+          };
+          const response = await axios.post('http://localhost:5000/update-quiz', payload);
+          console.log("Quiz updated:", response.data);
+          this.closeEditModal();
+          this.fetchSavedQuizzes();
+          this.closeQuizModal();
+        } catch (error) {
+          console.error("Error updating quiz:", error);
+          this.editError = 'Failed to save changes. Please try again.';
+        }
+      },
+      toggleQuestionVisibility(index) {
+        this.editableQuestions[index].expanded = !this.editableQuestions[index].expanded;
+      },
+      addOption(index) {
+        this.editableQuestions[index].options.push('');
+      },
+      deleteQuestion(index) {
+        this.editableQuestions.splice(index, 1);
+      },
+      addNewQuestion() {
+        const newQuestion = {
+          questionID: Date.now(),
+          question: '',
+          type: 'multiple-choice', // default type
+          options: ['Option 1', 'Option 2', 'Option 3', 'Option 4'], // Default 4 options for MCQ
+          answer: 'Option 1',
+          expanded: true
+        };
+        newQuestion.answer = newQuestion.options[0]; 
+        this.editableQuestions.push(newQuestion);
+      },
+      changeQuestionType(index, newType) {
+        const question = this.editableQuestions[index];
+        question.type = newType;
+        if (newType === 'multiple-choice') {
+          question.options = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
+          question.answer = 'Option 1';
+        } else if (newType === 'true-false') {
+          question.options = []; 
+          question.answer = 'True';
+        } else if (newType === 'short-answer') {
+          question.options = []; 
+          question.answer = '';
+        }
       },
       reattemptQuiz(quiz) {
         this.activeQuiz = quiz;
@@ -488,6 +606,51 @@
     .modal-box {
       width: 90%;
     }
+  }
+
+  .scrollable-modal {
+    overflow-y: auto;
+    max-height: 80vh;
+  }
+
+  .question-box {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: #f9f9f9;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s ease;
+  }
+
+  .question-box:hover {
+    background: #f1f1f1;
+  }
+
+  .question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .question-editor {
+    background: white;
+    padding: 10px;
+    margin-top: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+
+  .option-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+  }
+
+  .option-input {
+    flex: 1;
   }
 
   /* Buttons */

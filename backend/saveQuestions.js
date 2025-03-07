@@ -164,4 +164,65 @@ const deleteQuiz = async (userID, quizID) => {
     }
   };
 
-module.exports = { saveQuiz, saveQuestions, getSavedQuizzes, deleteQuiz };
+  const updateQuiz = async (userID, quizID, updatedQuestions) => {
+    if (!userID || !quizID || !Array.isArray(updatedQuestions)) {
+        throw new Error("Missing userID, quizID, or questions.");
+    }
+
+    try {
+        // 1. Fetch existing quiz questions to delete
+        const scanParams = {
+            TableName: QUESTIONS_TABLE,
+            FilterExpression: "quizID = :quizID AND userID = :userID",
+            ExpressionAttributeValues: {
+                ":quizID": quizID,
+                ":userID": Number(userID)
+            }
+        };
+
+        const scanCommand = new ScanCommand(scanParams);
+        const { Items } = await dynamoDB.send(scanCommand);
+
+        // 2. Delete all existing questions
+        for (const question of Items) {
+            const deleteParams = {
+                TableName: QUESTIONS_TABLE,
+                Key: {
+                    questionID: question.questionID,
+                    userID: Number(userID)
+                }
+            };
+            await dynamoDB.send(new DeleteCommand(deleteParams));
+        }
+
+        // 3. Re-insert updated questions
+        for (const q of updatedQuestions) {
+            const newQuestionID = await generateQuestionID(); // Re-generate questionID for each
+            const params = {
+                TableName: QUESTIONS_TABLE,
+                Item: {
+                    questionID: Number(newQuestionID),
+                    userID: Number(userID),
+                    quizID,
+                    quizName: q.quizName || Items[0].quizName,
+                    youtubeLink: q.youtubeLink || Items[0].youtubeLink,
+                    question: q.question,
+                    type: q.type,
+                    options: q.options || [],
+                    answer: q.answer,
+                    time: q.time || ""
+                }
+            };
+
+            await dynamoDB.send(new PutCommand(params));
+        }
+
+        console.log(`Quiz ${quizID} updated successfully.`);
+        return { success: true, message: "Quiz updated successfully." };
+    } catch (error) {
+        console.error("Error updating quiz:", error);
+        throw new Error("Failed to update quiz.");
+    }
+};
+
+module.exports = { saveQuiz, saveQuestions, getSavedQuizzes, deleteQuiz, updateQuiz };

@@ -17,6 +17,7 @@ const {
 const { saveQuiz } = require("./saveQuestions");
 const { getSavedQuizzes } = require("./saveQuestions");
 const { deleteQuiz } = require("./saveQuestions"); 
+const { updateQuiz } = require("./saveQuestions");
 const { sendFriendRequest, acceptFriendRequest, getFriends, removeFriend } = require('./friend');
 const { sendQuizToFriend, getReceivedQuizzes } = require('./receivedQuestions');
 // enables CORS for all routes
@@ -287,6 +288,22 @@ app.delete("/delete-quiz", async (req, res) => {
       res.status(500).json({ success: false, message: "Failed to delete quiz." });
     }
   });
+
+  app.post('/update-quiz', async (req, res) => {
+    const { userID, quizID, questions } = req.body;
+
+    if (!userID || !quizID || !Array.isArray(questions)) {
+        return res.status(400).json({ error: 'Missing required fields.' });
+    }
+
+    try {
+        const result = await updateQuiz(userID, quizID, questions);
+        res.json(result);
+    } catch (error) {
+        console.error("Error updating quiz:", error.message);
+        res.status(500).json({ error: 'Failed to update quiz.' });
+    }
+});
 
 
 app.post("/send-friend-request", sendFriendRequest);
