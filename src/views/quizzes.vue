@@ -113,6 +113,7 @@
             <p>
               <strong>Question:</strong> {{ activeQuiz.questions[currentQuestion].question }}
             </p>
+            <button class="btn btn-secondary m-1">Play Section</button>
             <!-- Multiple Choice -->
             <div v-if="activeQuiz.questions[currentQuestion].type === 'multiple-choice'" class="multiple-choice-options">
               <button v-for="(option, index) in activeQuiz.questions[currentQuestion].options" :key="index" class="btn btn-secondary" :class="{
@@ -579,7 +580,9 @@
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     text-align: center;
-    height: 350px;
+    height: 450px;
+    overflow-y: auto; 
+    overflow-x: hidden;
     position: relative;
   }
 
