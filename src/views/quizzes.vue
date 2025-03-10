@@ -71,35 +71,48 @@
                   </div>
                   <!-- Expanded area for editing -->
                   <div v-if="question.expanded" class="question-editor">
-                    <input v-model="question.question" placeholder="Edit question text" class="form-control" />
-                    <select v-model="question.type" @change="changeQuestionType(index, question.type)" class="form-control mt-2">
-                      <option value="multiple-choice">Multiple Choice</option>
-                      <option value="true-false">True/False</option>
-                      <option value="short-answer">Short Answer</option>
-                    </select>
-                    <!-- Multiple Choice Editing -->
-                    <div v-if="question.type === 'multiple-choice'">
-                      <div v-for="(option, i) in question.options" :key="i" class="option-item">
-                        <input v-model="question.options[i]" placeholder="Option" class="form-control option-input" />
-                        <input type="radio" :value="option" v-model="question.answer" /> Correct
+                    <div class="form-group">
+                      <label>Question</label>
+                      <input v-model="question.question" placeholder="Edit question text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                      <label>Type</label>
+                      <select v-model="question.type" @change="changeQuestionType(index, question.type)" class="form-control">
+                        <option value="multiple-choice">Multiple Choice</option>
+                        <option value="true-false">True/False</option>
+                        <option value="short-answer">Short Answer</option>
+                      </select>
+                    </div>
+                    <div v-if="question.type === 'multiple-choice'" class="form-group">
+                      <label>Choices</label>
+                      <div class="multiple-choice-container">
+                        <div v-for="(option, i) in question.options" :key="i" class="option-item">
+                          <input v-model="question.options[i]" placeholder="Option" class="form-control option-input" />
+                          <input type="radio" :value="option" v-model="question.answer" /> Correct
+                        </div>
                       </div>
                     </div>
-                    <!-- True/False Editing -->
-                    <div v-if="question.type === 'true-false'">
+                    <div v-if="question.type === 'true-false'" class="form-group">
+                      <label>Answer</label>
                       <label>
                         <input type="radio" value="True" v-model="question.answer" /> True </label>
                       <label>
                         <input type="radio" value="False" v-model="question.answer" /> False </label>
                     </div>
-                    <!-- Short Answer Editing -->
-                    <div v-if="question.type === 'short-answer'">
+                    <div v-if="question.type === 'short-answer'" class="form-group">
+                      <label>Answer</label>
                       <input v-model="question.answer" placeholder="Correct Answer" class="form-control" />
                     </div>
+                    <div class="form-group">
+                      <label>Reference</label>
+                      <input v-model="question.time" placeholder="e.g. 192s" class="form-control" @blur="validateTimestamp(index)" />
+                    </div>
+                    <p v-if="timestampErrors[index]" class="text-danger">Invalid format, use numbers followed by 's'.</p>
                     <button class="btn btn-danger btn-sm mt-2" @click="deleteQuestion(index)">Delete Question</button>
                   </div>
                 </div>
                 <button class="btn btn-purple m-2" @click="addNewQuestion">Add New Question</button>
-                <button class="btn btn-purple m-2" @click="saveQuizChanges">Save Changes</button>
+                <button class="btn btn-purple m-2" @click="saveQuizChanges" :disabled="hasInvalidTimestamps">Save Changes</button>
                 <button class="btn btn-secondary m-2" @click="closeEditModal">Cancel</button>
               </div>
               <p v-if="editError" class="text-danger">{{ editError }}</p>
@@ -113,9 +126,7 @@
             <p>
               <strong>Question:</strong> {{ activeQuiz.questions[currentQuestion].question }}
             </p>
-            <button class="btn btn-secondary m-1" @click="openVideoModal">
-              Play Section
-            </button>
+            <button class="btn btn-secondary m-1" @click="openVideoModal"> Play Section </button>
             <!-- Multiple Choice -->
             <div v-if="activeQuiz.questions[currentQuestion].type === 'multiple-choice'" class="multiple-choice-options">
               <button v-for="(option, index) in activeQuiz.questions[currentQuestion].options" :key="index" class="btn btn-secondary" :class="{
@@ -221,6 +232,7 @@
         showEditModal: false,
         editableQuestions: [],
         editError: '',
+        timestampErrors: {},
         selectedFriendID: null,
         userID: Number(localStorage.getItem('userID')) || null,
         showVideoModal: false,
@@ -231,6 +243,11 @@
       this.getUsername();
       this.fetchSavedQuizzes();
       this.fetchReceivedQuizzes();
+    },
+    computed: {
+      hasInvalidTimestamps() {
+        return Object.values(this.timestampErrors).some(error => error);
+      }
     },
     methods: {
       getUsername() {
@@ -269,11 +286,11 @@
         this.selectedAnswer = '';
         this.feedback = '';
         if (this.receivedQuizzes.some(q => q.quizID === quiz.quizID)) {
-          this.quizStarted = true; 
+          this.quizStarted = true;
         } else {
           this.quizStarted = false;
         }
-          this.showQuizModal = true;
+        this.showQuizModal = true;
       },
       closeQuizModal() {
         this.showQuizModal = false;
@@ -300,6 +317,15 @@
         this.showVideoModal = true;
         console.log("Opening video:", this.videoUrlWithTimestamp);
       },
+      validateTimestamp(index) {
+        const timestampRegex = /^\d+s$/; // Only numbers followed by 's'
+        if (!timestampRegex.test(this.editableQuestions[index].time)) {
+          this.timestampErrors[index] = true; // Show error
+          this.editableQuestions[index].time = "0s"; // Reset to default
+        } else {
+          this.timestampErrors[index] = false; // No error
+        }
+      },
       closeVideoModal() {
         this.showVideoModal = false;
       },
@@ -311,7 +337,7 @@
           type: q.type,
           options: q.options ? [...q.options] : [],
           answer: q.answer,
-          time: q.time,
+          time: q.time || "0s",
           expanded: false
         }));
       },
@@ -491,7 +517,6 @@
   };
 </script>
 <style scoped>
-
   .hero {
     background: rgb(138, 0, 183);
     color: white;
@@ -532,7 +557,7 @@
     margin-bottom: 10px;
     transition: opacity 0.3s ease;
   }
-  
+
   .back-button:hover {
     opacity: 0.8;
   }
@@ -615,7 +640,7 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     text-align: center;
     height: 450px;
-    overflow-y: auto; 
+    overflow-y: auto;
     overflow-x: hidden;
     position: relative;
   }
@@ -688,6 +713,35 @@
   }
 
   /* Ensure the options are stacked vertically and same width */
+  .multiple-choice-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* Spacing between choices */
+    padding: 8px;
+    border-radius: 6px;
+  }
+
+  .option-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f9f9f9;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    transition: background 0.3s ease-in-out;
+  }
+
+  .option-item:hover {
+    background: #ececec;
+  }
+
+  .option-item input[type="radio"] {
+    margin-right: 8px;
+  }
+
+  /* Ensure the options are stacked vertically and same width */
   .multiple-choice-options {
     display: flex;
     flex-direction: column;
@@ -743,17 +797,51 @@
     margin-top: 8px;
     border: 1px solid #ddd;
     border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* Adds spacing between fields */
+  }
+
+  /* Label and Input Alignment */
+  .form-group {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 10px;
+  }
+
+  .form-group label {
+    width: 100px;
+    text-align: left;
+    font-weight: bold;
+  }
+
+  .form-group input,
+  .form-group select {
+    flex: 1;
+    /* Makes inputs take remaining space */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
   }
 
   .option-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-top: 5px;
+    width: 100%;
   }
 
   .option-input {
-    flex: 1;
+    flex-grow: 1;
+    /* Makes input take full width */
+    padding: 8px;
+    /* Adds padding */
+    min-width: 200px;
+    /* Ensures minimum width */
+    border: 1px solid #ccc;
+    border-radius: 4px;
   }
 
   /* Buttons */
