@@ -113,7 +113,9 @@
             <p>
               <strong>Question:</strong> {{ activeQuiz.questions[currentQuestion].question }}
             </p>
-            <button class="btn btn-secondary m-1">Play Section</button>
+            <button class="btn btn-secondary m-1" @click="openVideoModal">
+              Play Section
+            </button>
             <!-- Multiple Choice -->
             <div v-if="activeQuiz.questions[currentQuestion].type === 'multiple-choice'" class="multiple-choice-options">
               <button v-for="(option, index) in activeQuiz.questions[currentQuestion].options" :key="index" class="btn btn-secondary" :class="{
@@ -181,6 +183,12 @@
           <p v-if="sendQuizError" class="text-danger mt-2">{{ sendQuizError }}</p>
         </div>
       </div>
+      <div v-if="showVideoModal" class="video-modal">
+        <div class="video-modal-content">
+          <span class="video-close" @click="showVideoModal = false">&times;</span>
+          <iframe width="100%" height="400" :src="videoUrlWithTimestamp" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -214,8 +222,9 @@
         editableQuestions: [],
         editError: '',
         selectedFriendID: null,
-        checkingAnswer: false,
-        userID: Number(localStorage.getItem('userID')) || null
+        userID: Number(localStorage.getItem('userID')) || null,
+        showVideoModal: false,
+        videoUrlWithTimestamp: ""
       };
     },
     mounted() {
@@ -268,6 +277,31 @@
       },
       closeQuizModal() {
         this.showQuizModal = false;
+      },
+      openVideoModal() {
+        if (!this.activeQuiz || !this.activeQuiz.questions[this.currentQuestion]) {
+          console.error("No active quiz or question found.");
+          return;
+        }
+        let youtubeLink = this.activeQuiz.youtubeLink;
+        let time = this.activeQuiz.questions[this.currentQuestion]?.time;
+        if (!youtubeLink || !time) {
+          console.error("Invalid YouTube link or time data.");
+          return;
+        }
+        let videoIdMatch = youtubeLink.match(/(?:youtu\.be\/|youtube\.com\/.*[?&]v=|youtube\.com\/embed\/|youtube\.com\/v\/)([^&?#]+)/);
+        if (!videoIdMatch) {
+          console.error("Invalid YouTube URL:", youtubeLink);
+          return;
+        }
+        let videoId = videoIdMatch[1];
+        let seconds = parseInt(time.replace("s", ""), 10);
+        this.videoUrlWithTimestamp = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${seconds}`;
+        this.showVideoModal = true;
+        console.log("Opening video:", this.videoUrlWithTimestamp);
+      },
+      closeVideoModal() {
+        this.showVideoModal = false;
       },
       openEditModal(quiz) {
         this.showEditModal = true;
@@ -621,6 +655,36 @@
   .scrollable-modal {
     overflow-y: auto;
     max-height: 80vh;
+  }
+
+  .video-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .video-modal-content {
+    position: relative;
+    background: #fff;
+    padding: 35px;
+    border-radius: 5px;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .video-close {
+    position: absolute;
+    top: 0px;
+    right: 15px;
+    font-size: 30px;
+    cursor: pointer;
   }
 
   /* Ensure the options are stacked vertically and same width */
