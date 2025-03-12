@@ -1,0 +1,34 @@
+{
+    "family": "honours-task",
+    "networkMode": "awsvpc",
+    "executionRoleArn": "arn:aws:iam::767828737753:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+      {
+        "name": "honours-backend",
+        "image": "767828737753.dkr.ecr.eu-west-2.amazonaws.com/honours-backend:v2",
+        "memory": 512,
+        "cpu": 256,
+        "essential": true,
+        "portMappings": [
+          {
+            "containerPort": 3000,
+            "hostPort": 3000,
+            "protocol": "tcp"
+          }
+        ],
+        "environment": [
+          { "name": "GEMINI_API_URL", "value": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent" }
+        ],
+        "secrets": [
+          {
+            "name": "GEMINI_API_KEY",
+            "valueFrom": "arn:aws:ssm:eu-west-2:767828737753:parameter/GEMINI_API_KEY"
+          }
+        ]
+      }
+    ],
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "256",
+    "memory": "512"
+  }
+  

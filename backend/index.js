@@ -9,7 +9,6 @@ const fs = require("fs"); // used to read transcript files
 const path = require("path"); // used for handling file paths
 const crypto = require("crypto"); // used for generating unique file names
 const app = express();
-const port = 5000; // port where the server is
 const {
     registerUser,
     loginUser
@@ -317,9 +316,10 @@ app.post('/login', loginUser);
 app.post('/send-quiz-to-friend', sendQuizToFriend);
 app.get('/get-received-quizzes', getReceivedQuizzes);
 
-// starts the server and listens on the specified port
+const port = process.env.PORT || 3000;
+
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server running on port ${port}`);
 });
 
 // exports functions for external use or testing purposes
