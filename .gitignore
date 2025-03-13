@@ -17,6 +17,8 @@ coverage
 /cypress/videos/
 /cypress/screenshots/
 .env
+task-definition.json
+youtube-cookies.txt
 
 # Editor directories and files
 .vscode/*

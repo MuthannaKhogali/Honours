@@ -9,7 +9,7 @@ const client = new DynamoDBClient({ region: 'eu-west-2' });
 const dynamoDB = DynamoDBDocumentClient.from(client);
 
 // finds table User
-const USERS_TABLE = 'User';
+const USERS_TABLE = process.env.USERS_TABLE;
 
 // generates a user ID
 const generateUserID = async () => {

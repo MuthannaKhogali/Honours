@@ -7,8 +7,8 @@ const client = new DynamoDBClient({ region: 'eu-west-2' });
 const dynamoDB = DynamoDBDocumentClient.from(client);
 
 // define table names
-const FRIENDS_TABLE = 'Friends';
-const USERS_TABLE = 'User'; 
+const FRIENDS_TABLE = process.env.FRIENDS_TABLE;
+const USERS_TABLE = process.env.USERS_TABLE;
 
 // send friend request
 const sendFriendRequest = async (req, res) => {

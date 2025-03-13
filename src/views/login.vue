@@ -74,7 +74,7 @@ export default {
     // handle login request
     async handleLogin() {
       try {
-        const response = await axios.post('http://localhost:5000/login', {
+        const response = await axios.post('http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/login', {
           username: this.username,
           password: this.password
         });

@@ -4,7 +4,7 @@ const crypto = require("crypto");
 
 const client = new DynamoDBClient({ region: "eu-west-2" });
 const dynamoDB = DynamoDBDocumentClient.from(client);
-const QUESTIONS_TABLE = "Questions";
+const QUESTIONS_TABLE = process.env.QUESTIONS_TABLE;
 
 // function to generate 6-digit question ID
 const generateQuestionID = async () => {

@@ -32,9 +32,10 @@ const getYouTubeTranscript = async (videoUrl) => {
         // generate a unique
         const uniqueId = crypto.randomBytes(6).toString("hex");
         const transcriptFile = `transcript_${uniqueId}.en.vtt`;
+        const command = `yt-dlp --cookies /app/youtube-cookies.txt --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "${transcriptFile}" "${videoUrl}"`;
 
         // escape the videoUrl by wrapping it in double quotes
-        exec(`yt-dlp --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "transcript_${uniqueId}.%(ext)s" "${videoUrl}"`, (error, stdout, stderr) => {
+        exec(command, (error, stdout, stderr) => {
             if (error) {
                 reject(new Error(`yt-dlp error: ${error.message}`));
                 return;
@@ -159,6 +160,7 @@ const generateQuestions = async (transcriptText, numQuestions, questionTypes, us
 // endpoint to generate questions based on a YouTube video URL.
 // fetches the transcript and sends it to the Gemini API for generating questions.
 app.get('/generate-questions', async (req, res) => {
+    console.log("Generate Questions API Hit", req.query);
     const {
         videoUrl,
         numQuestions = 5,
@@ -166,16 +168,21 @@ app.get('/generate-questions', async (req, res) => {
         userID
     } = req.query;
     if (!videoUrl || !userID) {
+        console.error("Missing parameters:", { videoUrl, userID });
         return res.status(400).json({ error: 'Video URL and userID are required.' });
     }
     try {
+        console.log("Fetching transcript for video:", videoUrl);
         const transcript = await getYouTubeTranscript(videoUrl);
+        console.log("Sending to Gemini API...");
         const questions = await generateQuestions(transcript, parseInt(numQuestions), JSON.parse(questionTypes), userID, videoUrl);
+        console.log("Questions Generated Successfully!");
         res.json({
             transcript,
             questions
         });
     } catch (error) {
+        console.error("Error in /generate-questions:", error);
         res.status(400).json({
             error: error.message
         });
@@ -311,11 +318,23 @@ app.get("/get-friends", getFriends);
 app.post("/remove-friend", removeFriend);
 
 app.post('/register', registerUser);
-app.post('/login', loginUser);
+app.post('/login', async (req, res) => {
+    try {
+        console.log("Login request received:", req.body); // logs incoming requests clearly
+        await loginUser(req, res);
+    } catch (error) {
+        console.error("Login route caught error explicitly:", error);  // logs clearly
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 app.post('/send-quiz-to-friend', sendQuizToFriend);
 app.get('/get-received-quizzes', getReceivedQuizzes);
 
+app.get("/", (req, res) => {
+    res.status(200).send("OK");
+});
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {

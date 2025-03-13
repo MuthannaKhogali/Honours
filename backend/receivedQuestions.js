@@ -4,7 +4,7 @@ const { DynamoDBDocumentClient, PutCommand, QueryCommand, ScanCommand } = requir
 const client = new DynamoDBClient({ region: "eu-west-2" });
 const dynamoDB = DynamoDBDocumentClient.from(client);
 
-const RECEIVED_QUESTIONS_TABLE = "receivedQuestions";
+const RECEIVED_QUESTIONS_TABLE = process.env.RECEIVED_QUESTIONS_TABLE;
 
 const sendQuizToFriend = async (req, res) => {
     const { userID, friendID, quizID, youtubeLink, questions, quizName, senderUsername } = req.body;
