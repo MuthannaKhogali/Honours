@@ -29,14 +29,11 @@ app.use(express.urlencoded({
 // gets the youtube transcript using yt-dlp
 const getYouTubeTranscript = async (videoUrl) => {
     return new Promise((resolve, reject) => {
-        // generate a unique
         const uniqueId = crypto.randomBytes(6).toString("hex");
         const transcriptFile = `transcript_${uniqueId}.en.vtt`;
         const cookiesFile = "/home/ec2-user/youtube-cookies.txt";
 
-
-        // Construct the yt-dlp command with cookies
-        const ytDlpCommand = `yt-dlp --cookies "${cookiesFile}" --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "transcript_${uniqueId}.%(ext)s" "${videoUrl}"`;
+        const ytDlpCommand = `yt-dlp --cookies "${cookiesFile}" --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "${transcriptFile}" "${videoUrl}"`;
 
         exec(ytDlpCommand, (error, stdout, stderr) => {
             if (error) {
@@ -47,32 +44,31 @@ const getYouTubeTranscript = async (videoUrl) => {
                 console.error(`stderr: ${stderr}`);
             }
 
-            // wait for the file to be written before reading it
-            setTimeout(() => {
-                fs.readFile(transcriptFile, "utf8", (err, data) => {
-                    if (err) {
-                        reject(new Error("Failed to read transcript file."));
-                        return;
-                    }
+            console.log("Waiting for transcript file to be saved...");
 
-                    // convert .vtt to plain text
-                    const transcriptText = data
-                        .split("\n")
-                        .filter(line => !line.startsWith("WEBVTT") && !line.match(/^\d+$/) && !line.includes("-->"))
-                        .join(" ")
-                        .replace(/\s+/g, " ")
-                        .trim();
+            const checkFileInterval = setInterval(() => {
+                if (fs.existsSync(transcriptFile)) {
+                    clearInterval(checkFileInterval);
 
-                    // delete the temporary transcript file
-                    fs.unlink(transcriptFile, (unlinkErr) => {
-                        if (unlinkErr) {
-                            console.error(`Failed to delete transcript file: ${unlinkErr.message}`);
-                        } else {}
+                    fs.readFile(transcriptFile, "utf8", (err, data) => {
+                        if (err) {
+                            reject(new Error("Failed to read transcript file."));
+                            return;
+                        }
+
+                        // Convert .vtt to plain text
+                        const transcriptText = data
+                            .split("\n")
+                            .filter(line => !line.startsWith("WEBVTT") && !line.match(/^\d+$/) && !line.includes("-->"))
+                            .join(" ")
+                            .replace(/\s+/g, " ")
+                            .trim();
+
+                        // Instead of deleting here, pass transcriptFile name
+                        resolve({ transcriptText, transcriptFile });
                     });
-
-                    resolve(transcriptText);
-                });
-            }, 2000); // delay to ensure file is saved
+                }
+            }, 500);
         });
     });
 };
@@ -170,27 +166,38 @@ app.get('/generate-questions', async (req, res) => {
         questionTypes = ["multiple-choice"],
         userID
     } = req.query;
+
     if (!videoUrl || !userID) {
         console.error("Missing parameters:", { videoUrl, userID });
         return res.status(400).json({ error: 'Video URL and userID are required.' });
     }
+
     try {
         console.log("Fetching transcript for video:", videoUrl);
-        const transcript = await getYouTubeTranscript(videoUrl);
+        const { transcriptText, transcriptFile } = await getYouTubeTranscript(videoUrl);
+        
         console.log("Sending to Gemini API...");
-        const questions = await generateQuestions(transcript, parseInt(numQuestions), JSON.parse(questionTypes), userID, videoUrl);
+        const questions = await generateQuestions(transcriptText, parseInt(numQuestions), JSON.parse(questionTypes), userID, videoUrl);
+        
         console.log("Questions Generated Successfully!");
-        res.json({
-            transcript,
-            questions
+
+        // ✅ Delete the transcript file AFTER generating questions
+        fs.unlink(transcriptFile, (unlinkErr) => {
+            if (unlinkErr) {
+                console.error(`Failed to delete transcript file: ${unlinkErr.message}`);
+            } else {
+                console.log(`Transcript file deleted: ${transcriptFile}`);
+            }
         });
+
+        res.json({ transcriptText, questions });
+
     } catch (error) {
         console.error("Error in /generate-questions:", error);
-        res.status(400).json({
-            error: error.message
-        });
+        res.status(400).json({ error: error.message });
     }
 });
+
 
 app.post('/validate-answer', async (req, res) => {
     const { userAnswer, question, correctAnswer } = req.body;
