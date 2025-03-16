@@ -32,7 +32,8 @@ const getYouTubeTranscript = async (videoUrl) => {
         // generate a unique
         const uniqueId = crypto.randomBytes(6).toString("hex");
         const transcriptFile = `transcript_${uniqueId}.en.vtt`;
-        const cookiesFile = "/home/ec2-user/Honours/backend/youtube-cookies.txt"; // path
+        const cookiesFile = "/home/ec2-user/youtube-cookies.txt";
+
 
         // Construct the yt-dlp command with cookies
         const ytDlpCommand = `yt-dlp --cookies "${cookiesFile}" --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "transcript_${uniqueId}.%(ext)s" "${videoUrl}"`;
