@@ -286,7 +286,7 @@
           return;
           }
           try {
-            const response = await axios.get('http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/generate-questions', {
+            const response = await axios.get('http://18.133.180.64:3000/generate-questions', {
               params: {
                 videoUrl: this.youtubeLink,
                 numQuestions: this.numQuestions,
