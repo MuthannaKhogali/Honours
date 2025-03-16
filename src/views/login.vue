@@ -95,7 +95,7 @@ export default {
         return;
       }
       try {
-        await axios.post('http://localhost:5000/register', {
+        await axios.post('http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/register', {
           username: this.username,
           password: this.password
         });

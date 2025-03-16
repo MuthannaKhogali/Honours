@@ -2,7 +2,7 @@
   <div class="home-page">
     <nav class="navbar navbar-expand-lg navbar-dark bg-purple">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">Logo</a>
+        <a class="navbar-brand" href="#">Cap2Q</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
                 data-bs-target="#navbarNav" aria-controls="navbarNav" 
                 aria-expanded="false" aria-label="Toggle navigation">
@@ -19,7 +19,7 @@
     </nav>
 
     <div class="content text-center">
-      <h1>Study Easier Using NAME</h1>
+      <h1>Study Easier Using Caption2Question</h1>
       <p class="text-muted">Generate questions from videos, and test your knowledge</p>
       <router-link to="/login">
         <button class="custom-btn">Sign Up Now</button>

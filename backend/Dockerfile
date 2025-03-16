@@ -12,27 +12,34 @@ RUN npm install
 
 # Install necessary dependencies
 RUN apt-get update && apt-get install -y \
-    yt-dlp \
     curl \
     wget \
     unzip \
     ca-certificates \
     chromium \
     chromium-driver \
+    chromium-sandbox \
     ffmpeg \
-    python3-pip
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*  # Reduce image size
 
-# Update yt-dlp to latest version
+# Manually install latest yt-dlp (preferred over apt version)
 RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp && \
-    chmod a+rx /usr/local/bin/yt-dlp
+    chmod a+rx /usr/local/bin/yt-dlp && \
+    ln -s /usr/local/bin/yt-dlp /usr/bin/yt-dlp  # Ensure yt-dlp is globally available
 
-# Copy YouTube cookies into the container
-COPY youtube-cookies.txt /app/youtube-cookies.txt
+# Verify yt-dlp installation
+RUN yt-dlp --version
+
+# Create non-root user for security
+RUN useradd -m appuser
+USER appuser
 
 # Copy the rest of the application
-COPY . .
+COPY --chown=appuser:appuser . .
 
-# Expose port (update if different)
+# Expose port
 EXPOSE 3000
 
 # Start the server

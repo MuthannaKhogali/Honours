@@ -32,10 +32,9 @@ const getYouTubeTranscript = async (videoUrl) => {
         // generate a unique
         const uniqueId = crypto.randomBytes(6).toString("hex");
         const transcriptFile = `transcript_${uniqueId}.en.vtt`;
-        const command = `yt-dlp --cookies /app/youtube-cookies.txt --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "${transcriptFile}" "${videoUrl}"`;
 
         // escape the videoUrl by wrapping it in double quotes
-        exec(command, (error, stdout, stderr) => {
+        exec(`yt-dlp --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "transcript_${uniqueId}.%(ext)s" "${videoUrl}"`, (error, stdout, stderr) => {
             if (error) {
                 reject(new Error(`yt-dlp error: ${error.message}`));
                 return;
