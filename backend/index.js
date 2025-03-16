@@ -26,53 +26,49 @@ app.use(express.urlencoded({
     extended: true
 }));
 
-// gets the youtube transcript using yt-dlp
+
 const getYouTubeTranscript = async (videoUrl) => {
     return new Promise((resolve, reject) => {
-        // generate a unique
         const uniqueId = crypto.randomBytes(6).toString("hex");
-        const transcriptFile = `transcript_${uniqueId}.en.vtt`;
+        const transcriptFile = path.resolve(__dirname, `transcript_${uniqueId}.en.vtt`); // Ensure absolute path
         const cookiesFile = "/home/ec2-user/youtube-cookies.txt";
 
+        console.log(` Running yt-dlp for video: ${videoUrl}`);
+        console.log(`Expected transcript file path: ${transcriptFile}`);
 
-        // Construct the yt-dlp command with cookies
-        const ytDlpCommand = `yt-dlp --cookies "${cookiesFile}" --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "transcript_${uniqueId}.%(ext)s" "${videoUrl}"`;
+        const ytDlpCommand = `yt-dlp --cookies "${cookiesFile}" --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "${transcriptFile}" "${videoUrl}"`;
 
         exec(ytDlpCommand, (error, stdout, stderr) => {
             if (error) {
+                console.error(`yt-dlp error: ${error.message}`);
                 reject(new Error(`yt-dlp error: ${error.message}`));
                 return;
             }
-            if (stderr) {
-                console.error(`stderr: ${stderr}`);
-            }
+            console.error(`stderr: ${stderr}`);
 
-            // wait for the file to be written before reading it
-            setTimeout(() => {
-                fs.readFile(transcriptFile, "utf8", (err, data) => {
-                    if (err) {
-                        reject(new Error("Failed to read transcript file."));
-                        return;
-                    }
+            console.log("Waiting for transcript file to be saved...");
 
-                    // convert .vtt to plain text
-                    const transcriptText = data
-                        .split("\n")
-                        .filter(line => !line.startsWith("WEBVTT") && !line.match(/^\d+$/) && !line.includes("-->"))
-                        .join(" ")
-                        .replace(/\s+/g, " ")
-                        .trim();
+            let attempts = 0;
+            const checkFileExists = setInterval(() => {
+                if (fs.existsSync(transcriptFile)) {
+                    clearInterval(checkFileExists);
+                    console.log(`Transcript file found: ${transcriptFile}`);
 
-                    // delete the temporary transcript file
-                    fs.unlink(transcriptFile, (unlinkErr) => {
-                        if (unlinkErr) {
-                            console.error(`Failed to delete transcript file: ${unlinkErr.message}`);
-                        } else {}
+                    fs.readFile(transcriptFile, "utf8", (err, data) => {
+                        if (err) {
+                            reject(new Error("Failed to read transcript file."));
+                            return;
+                        }
+
+                        resolve(data);
                     });
-
-                    resolve(transcriptText);
-                });
-            }, 2000); // delay to ensure file is saved
+                } else if (attempts >= 20) {
+                    clearInterval(checkFileExists);
+                    reject(new Error(`Transcript file not found after 10 seconds: ${transcriptFile}`));
+                } else {
+                    attempts++;
+                }
+            }, 500);
         });
     });
 };
