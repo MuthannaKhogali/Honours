@@ -256,7 +256,7 @@
       async fetchSavedQuizzes() {
         this.loading = true;
         try {
-          const response = await axios.get('http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/get-saved-quizzes', {
+          const response = await axios.get('http://18.133.180.64:3000/get-saved-quizzes', {
             params: {
               userID: this.userID
             }
@@ -269,7 +269,7 @@
         }
       },
       async fetchReceivedQuizzes() {
-        const response = await axios.get("http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/get-received-quizzes", {
+        const response = await axios.get("http://18.133.180.64:3000/get-received-quizzes", {
           params: {
             userID: this.userID
           }
@@ -352,7 +352,7 @@
             quizID: this.selectedQuiz.quizID,
             questions: this.editableQuestions
           };
-          const response = await axios.post('http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/update-quiz', payload);
+          const response = await axios.post('http://18.133.180.64:3000/update-quiz', payload);
           console.log("Quiz updated:", response.data);
           this.closeEditModal();
           this.fetchSavedQuizzes();
@@ -419,7 +419,7 @@
         this.checkingAnswer = true;
         const currentQuestion = this.activeQuiz.questions[this.currentQuestion];
         try {
-          const response = await axios.post('http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/validate-answer', {
+          const response = await axios.post('http://18.133.180.64:3000/validate-answer', {
             userAnswer: this.selectedAnswer.trim(),
             question: currentQuestion.question,
             correctAnswer: currentQuestion.answer
@@ -458,7 +458,7 @@
       },
       async deleteQuiz(quiz) {
         try {
-          await axios.delete('http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/delete-quiz', {
+          await axios.delete('http://18.133.180.64:3000/delete-quiz', {
             data: {
               userID: this.userID,
               quizID: quiz.quizID
@@ -476,7 +476,7 @@
         this.selectedFriendID = null;
         this.sendQuizError = '';
         try {
-          const response = await axios.get("http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/get-friends", {
+          const response = await axios.get("http://18.133.180.64:3000/get-friends", {
             params: {
               userID: this.userID
             }
@@ -494,7 +494,7 @@
           return;
         }
         try {
-          await axios.post('http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/send-quiz-to-friend', {
+          await axios.post('http://18.133.180.64:3000/send-quiz-to-friend', {
             userID: this.userID,
             senderUsername: this.username,
             friendID: this.selectedFriendID,

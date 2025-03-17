@@ -74,7 +74,7 @@ export default {
     // handle login request
     async handleLogin() {
       try {
-        const response = await axios.post('http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/login', {
+        const response = await axios.post('http://18.133.180.64:3000/login', {
           username: this.username,
           password: this.password
         });
@@ -95,7 +95,7 @@ export default {
         return;
       }
       try {
-        await axios.post('http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/register', {
+        await axios.post('http://18.133.180.64:3000/register', {
           username: this.username,
           password: this.password
         });

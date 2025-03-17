@@ -243,7 +243,7 @@
           if (!userAnswer) return;
           this.checkingAnswer = true;
           try {
-            const response = await axios.post('http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/validate-answer', {
+            const response = await axios.post('http://18.133.180.64:3000/validate-answer', {
               userAnswer,
               question,
               correctAnswer
@@ -320,7 +320,7 @@
           }
 
           try {
-              const response = await axios.post('http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/save-quiz', {
+              const response = await axios.post('http://18.133.180.64:3000/save-quiz', {
                   userID: userID,
                   youtubeLink: this.youtubeLink,
                   questions: this.questions,

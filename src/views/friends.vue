@@ -76,7 +76,7 @@
           return;
         }
         try {
-          await axios.post("http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/send-friend-request", {
+          await axios.post("http://18.133.180.64:3000/send-friend-request", {
             userID: this.userID,
             friendUsername: this.friendUsername,
           });
@@ -88,7 +88,7 @@
       },
       async getFriends() {
         try {
-          const response = await axios.get("http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/get-friends", { params: { userID: this.userID } });
+          const response = await axios.get("http://18.133.180.64:3000/get-friends", { params: { userID: this.userID } });
           this.friends = response.data.friends;
           this.pendingRequests = response.data.pendingRequests;
         } catch (error) {
@@ -96,11 +96,11 @@
         }
       },
       async acceptFriend(friendID) {
-        await axios.post("http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/accept-friend-request", { userID: this.userID, friendID });
+        await axios.post("http://18.133.180.64:3000/accept-friend-request", { userID: this.userID, friendID });
         this.getFriends();
       },
       async removeFriend(friendID) {
-        await axios.post("http://honours-alb-1954102609.eu-west-2.elb.amazonaws.com/remove-friend", { userID: this.userID, friendID });
+        await axios.post("http://18.133.180.64:3000/remove-friend", { userID: this.userID, friendID });
         this.getFriends();
       }
     }
