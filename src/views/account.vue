@@ -660,10 +660,29 @@
   }
 
   .modal-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Two buttons per row */
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+  max-width: 500px; /* Adjust width to prevent buttons from being too wide */
+  margin: 0 auto; /* Center the buttons */
+}
+
+/* Responsive: Ensure 2x2 layout on mobile */
+@media (max-width: 480px) {
+  .modal-buttons {
     display: flex;
-    gap: 15px;
+    flex-wrap: wrap;
     justify-content: center;
+    gap: 10px;
   }
+  
+  .modal-buttons button {
+    width: 48%; /* Each button takes half of the row */
+  }
+}
+
 
   @media (max-width: 768px) {
     .modal-box {
@@ -706,26 +725,60 @@
     cursor: pointer;
   }
 
-  /* Ensure the options are stacked vertically and same width */
-  .multiple-choice-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    /* Spacing between choices */
-    padding: 8px;
-    border-radius: 6px;
+/* Ensure the multiple-choice input boxes stay inside the modal */
+.multiple-choice-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 100%; /* Ensures the container does not exceed modal width */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* Style individual option items */
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f9f9f9;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  transition: background 0.3s ease-in-out;
+  width: 100%; /* Ensures full width inside modal */
+  box-sizing: border-box;
+  flex-wrap: wrap; /* Wraps content properly */
+}
+
+/* Ensure the input box does not overflow */
+.option-input {
+  flex-grow: 1;
+  padding: 8px;
+  min-width: 0; /* Allows shrinking */
+  max-width: 100%; /* Prevents it from overflowing */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* Fix for very small mobile screens */
+@media (max-width: 480px) {
+  .option-item {
+    flex-direction: column; /* Stack items vertically on very small screens */
+    align-items: flex-start; /* Align to the left */
+    gap: 5px;
   }
 
-  .option-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #f9f9f9;
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    transition: background 0.3s ease-in-out;
+  .option-input {
+    width: 100%; /* Ensure input box spans full width */
   }
+
+  .option-item input[type="radio"] {
+    margin-left: 5px; /* Adjust radio button alignment */
+  }
+}
 
   .option-item:hover {
     background: #ececec;
@@ -764,15 +817,17 @@
   }
 
   .question-box {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    padding: 10px;
-    background: #f9f9f9;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: background 0.3s ease;
-  }
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #f9f9f9;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease;
+  width: 100%;
+  overflow: hidden; 
+}
 
   .question-box:hover {
     background: #f1f1f1;
@@ -785,57 +840,92 @@
   }
 
   .question-editor {
-    background: white;
-    padding: 10px;
-    margin-top: 8px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    /* Adds spacing between fields */
+  background: white;
+  padding: 10px;
+  margin-top: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden; 
+}
+
+
+.form-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%; 
+}
+
+/* Labels and inputs */
+.form-group label {
+  width: 100px;
+  text-align: left;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.form-group input,
+.form-group select {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%; 
+  box-sizing: border-box; 
+}
+
+/* Ensures multiple-choice options stay inside */
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  flex-wrap: wrap; 
+}
+
+
+.option-input {
+  flex-grow: 1;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Responsive fix for mobile */
+@media (max-width: 480px) {
+  .question-editor {
+    padding: 8px;
   }
 
-  /* Label and Input Alignment */
   .form-group {
-    display: flex;
-    align-items: center;
-    justify-content: start;
-    gap: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
   }
 
   .form-group label {
-    width: 100px;
-    text-align: left;
-    font-weight: bold;
+    width: 100%;
   }
 
   .form-group input,
   .form-group select {
-    flex: 1;
-    /* Makes inputs take remaining space */
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-
-  .option-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
     width: 100%;
   }
 
-  .option-input {
-    flex-grow: 1;
-    /* Makes input take full width */
-    padding: 8px;
-    /* Adds padding */
-    min-width: 200px;
-    /* Ensures minimum width */
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  .option-item {
+    flex-direction: column;
+    align-items: flex-start;
   }
+
+  .option-input {
+    width: 100%;
+  }
+}
 
   /* Buttons */
   .btn {

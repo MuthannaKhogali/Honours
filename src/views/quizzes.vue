@@ -666,10 +666,29 @@
   }
 
   .modal-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Two buttons per row */
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+  max-width: 500px; /* Adjust width to prevent buttons from being too wide */
+  margin: 0 auto; /* Center the buttons */
+}
+
+/* Responsive: Ensure 2x2 layout on mobile */
+@media (max-width: 480px) {
+  .modal-buttons {
     display: flex;
-    gap: 15px;
+    flex-wrap: wrap;
     justify-content: center;
+    gap: 10px;
   }
+  
+  .modal-buttons button {
+    width: 48%; /* Each button takes half of the row */
+  }
+}
+
 
   @media (max-width: 768px) {
     .modal-box {
@@ -771,15 +790,17 @@
   }
 
   .question-box {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    padding: 10px;
-    background: #f9f9f9;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: background 0.3s ease;
-  }
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #f9f9f9;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease;
+  width: 100%;
+  overflow: hidden;
+}
 
   .question-box:hover {
     background: #f1f1f1;
@@ -792,57 +813,92 @@
   }
 
   .question-editor {
-    background: white;
-    padding: 10px;
-    margin-top: 8px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    /* Adds spacing between fields */
+  background: white;
+  padding: 10px;
+  margin-top: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden; 
+}
+
+/* Ensure input fields do not overflow */
+.form-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%; 
+}
+
+/* Labels and inputs */
+.form-group label {
+  width: 100px;
+  text-align: left;
+  font-weight: bold;
+  flex-shrink: 0; 
+}
+
+.form-group input,
+.form-group select {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%; 
+  box-sizing: border-box; 
+}
+
+/* Ensures multiple-choice options stay inside */
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  flex-wrap: wrap; 
+}
+
+/* Prevents inputs from overflowing */
+.option-input {
+  flex-grow: 1;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Responsive fix for mobile */
+@media (max-width: 480px) {
+  .question-editor {
+    padding: 8px;
   }
 
-  /* Label and Input Alignment */
   .form-group {
-    display: flex;
-    align-items: center;
-    justify-content: start;
-    gap: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
   }
 
   .form-group label {
-    width: 100px;
-    text-align: left;
-    font-weight: bold;
+    width: 100%;
   }
 
   .form-group input,
   .form-group select {
-    flex: 1;
-    /* Makes inputs take remaining space */
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-
-  .option-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
     width: 100%;
   }
 
-  .option-input {
-    flex-grow: 1;
-    /* Makes input take full width */
-    padding: 8px;
-    /* Adds padding */
-    min-width: 200px;
-    /* Ensures minimum width */
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  .option-item {
+    flex-direction: column;
+    align-items: flex-start;
   }
+
+  .option-input {
+    width: 100%;
+  }
+}
 
   /* Buttons */
   .btn {
