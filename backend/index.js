@@ -35,6 +35,7 @@ const getYouTubeTranscript = async (videoUrl) => {
 
         console.log(` Running yt-dlp for video: ${videoUrl}`);
         console.log(`Expected transcript file path: ${transcriptFile}`);
+        
 
         const ytDlpCommand = `yt-dlp --cookies "${cookiesFile}" --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "transcript_${uniqueId}" "${videoUrl}"`;
 

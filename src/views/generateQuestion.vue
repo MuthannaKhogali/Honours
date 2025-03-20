@@ -300,7 +300,7 @@
             let cleanedResponse = response.data.questions.replace(/```json|```/g, '').trim();
             this.questions = JSON.parse(cleanedResponse);
           } catch (error) {
-            this.errorMessage = error.response?.data?.error || 'An error occurred while generating questions.';
+            this.errorMessage = 'An error occurred while generating questions.';
           } finally {
             this.loading = false;
           }
