@@ -114,7 +114,12 @@ export default {
 
   // event listener for different sized screen
   mounted() {
-    window.addEventListener('resize', this.handleResize);
+  window.addEventListener('resize', this.handleResize);
+  
+    // If ?register=true, switch to register mode
+    if (this.$route.query.register === 'true') {
+      this.isRegistering = true;
+    }
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.handleResize);
@@ -222,7 +227,7 @@ html, body {
 
 /* Text Link Styling */
 .text-link {
-  color: white;
+  color: rgb(184, 198, 255);
   text-decoration: underline;
   cursor: pointer;
   margin-left: 5px;
@@ -230,7 +235,7 @@ html, body {
 }
 @media (max-width: 1150px) {
   .text-link {
-    color: rgb(62, 101, 255);
+    color: rgb(110, 136, 239);
   }
 }
 </style>

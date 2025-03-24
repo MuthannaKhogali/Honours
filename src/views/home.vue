@@ -21,7 +21,7 @@
     <div class="content text-center">
       <h1>Study Easier Using Caption2Question</h1>
       <p class="text-muted">Generate questions from videos, and test your knowledge</p>
-      <router-link to="/login">
+      <router-link :to="{ path: '/login', query: { register: 'true' } }">
         <button class="custom-btn">Sign Up Now</button>
       </router-link>
     </div>

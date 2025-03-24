@@ -30,7 +30,7 @@
             </select>
           </div>
           <div class="col-md-3">
-            <label for="timeLimit" class="form-label">Time</label>
+            <label for="timeLimit" class="form-label">Quiz Timer</label>
             <select v-model="timeLimit" id="timeLimit" class="form-select">
               <option :value="120">2 Minutes</option>
               <option :value="300">5 Minutes</option>
@@ -51,15 +51,20 @@
         <!-- Loader Animation -->
         <div v-if="loading" class="loader"></div>
         <div v-if="questions.length" class="shadow-lg p-4 mb-4 bg-white rounded position-relative">
-          <!-- Play Section Button -->
-          <button class="btn btn-secondary play-btn" @click="playVideo" v-if="!quizFinished">
-            Play Section
-          </button>
           <!-- Time Remaining -->
           <template v-if="!quizFinished">
-            <p>{{ questions[currentQuestion].question }}
-              <span v-if="timeLimit > 0" class="badge bg-secondary"> Time Remaining: {{ timeRemaining }}s </span>
-            </p>
+            <div class="question-header d-flex align-items-center justify-content-between flex-wrap mb-3" v-if="!quizFinished">
+  <p class="question-text mb-0 flex-grow-1 me-3">
+    {{ questions[currentQuestion].question }}
+    <span v-if="timeLimit > 0" class="badge bg-secondary ms-2">
+      Time Remaining: {{ timeRemaining }}s
+    </span>
+  </p>
+  <button class="btn btn-secondary play-btn" @click="playVideo">
+    Play Section
+  </button>
+</div>
+
             <!-- Multiple Choice Buttons -->
             <div v-if="questions[currentQuestion].type === 'multiple-choice'" class="d-flex flex-column">
             <button 
@@ -592,6 +597,32 @@
     align-items: center; /* Align with the text */
     white-space: nowrap; /* Prevents text wrapping */
   }
+  
+  .question-text {
+  font-size: 1rem;
+  word-break: break-word;
+  flex: 1;
+  min-width: 200px;
+}
+
+.play-btn {
+  white-space: nowrap;
+  margin-left: auto;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .question-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .play-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}
 
   /* Adjust layout for smaller screens */
   @media (max-width: 900px) {

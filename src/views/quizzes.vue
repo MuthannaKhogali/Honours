@@ -179,14 +179,16 @@
       <div v-if="showSendToFriendModal" class="modal-overlay">
         <div class="modal-box">
           <h3>Select a Friend to Send Quiz</h3>
-          <ul>
-            <li v-for="friend in friends" :key="friend.friendID">
-              <label>
-                <input type="radio" :value="friend.friendID" v-model="selectedFriendID" />
-                {{ friend.username }}
-              </label>
-            </li>
-          </ul>
+          <div class="friend-button-group">
+            <button
+              v-for="friend in friends"
+              :key="friend.friendID"
+              @click="toggleFriend(friend.friendID)"
+              :class="['btn', 'friend-select-btn', selectedFriendIDs.includes(friend.friendID) ? 'selected' : '']"
+            >
+            {{ friend.username }}
+            </button>
+          </div>
           <div class="modal-buttons">
             <button class="btn btn-purple" @click="confirmSendQuiz">Confirm</button>
             <button class="btn btn-secondary" @click="showSendToFriendModal = false">Cancel</button>
@@ -233,7 +235,7 @@
         editableQuestions: [],
         editError: '',
         timestampErrors: {},
-        selectedFriendID: null,
+        selectedFriendIDs: [],
         userID: Number(localStorage.getItem('userID')) || null,
         showVideoModal: false,
         videoUrlWithTimestamp: ""
@@ -488,19 +490,34 @@
           this.sendQuizError = "Failed to fetch friends. Please try again.";
         }
       },
+      selectFriend(friendID) {
+        this.selectedFriendID = friendID;
+      },  
+      toggleFriend(friendID) {
+        const index = this.selectedFriendIDs.indexOf(friendID);
+        if (index === -1) {
+          this.selectedFriendIDs.push(friendID);
+        } else {
+          this.selectedFriendIDs.splice(index, 1);
+        }
+      },
       async confirmSendQuiz() {
-        if (!this.selectedFriendID) {
-          this.sendQuizError = 'Please select a friend.';
+        if (!this.selectedFriendIDs.length) {
+          this.sendQuizError = 'Please select at least one friend.';
           return;
         }
+
         try {
-          await axios.post('http://18.133.180.64:3000/send-quiz-to-friend', {
-            userID: this.userID,
-            senderUsername: this.username,
-            friendID: this.selectedFriendID,
-            ...this.selectedQuiz
+          await Promise.all(this.selectedFriendIDs.map(friendID => {
+          return axios.post('http://18.133.180.64:3000/send-quiz-to-friend', {
+          userID: this.userID,
+          senderUsername: this.username,
+          friendID,
+          ...this.selectedQuiz
           });
-          this.showSendToFriendModal = false;
+        }));
+        this.showSendToFriendModal = false;
+        this.selectedFriendIDs = [];
         } catch (error) {
           this.sendQuizError = error.response?.data?.error || 'Failed to send quiz.';
         }
@@ -812,6 +829,14 @@
     align-items: center;
   }
 
+  .form-group select {
+  appearance: auto; 
+  -webkit-appearance: auto;
+  -moz-appearance: auto;
+  padding-right: 0px; 
+}
+
+
   .question-editor {
   background: white;
   padding: 10px;
@@ -825,6 +850,34 @@
   box-sizing: border-box;
   overflow-x: hidden; 
 }
+
+.friend-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.friend-select-btn {
+  padding: 10px 20px;
+  border: 0.5px solid rgb(138, 0, 183);
+  background: white;
+  color: rgb(138, 0, 183);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.friend-select-btn:hover {
+  background: rgba(138, 0, 183, 0.05);
+}
+
+.friend-select-btn.selected {
+  background: rgb(138, 0, 183);
+  color: white;
+}
+
 
 /* Ensure input fields do not overflow */
 .form-group {
@@ -903,7 +956,6 @@
   /* Buttons */
   .btn {
     padding: 10px 16px;
-    border: none;
     cursor: pointer;
     border-radius: 6px;
     text-decoration: none;
