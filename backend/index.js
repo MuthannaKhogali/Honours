@@ -110,30 +110,46 @@ const generateQuestions = async (transcriptText, numQuestions, questionTypes, us
                         Generate exactly ${numQuestions} questions that are strictly ${formattedInstruction}.  
                         ${strictFilter}  
                         Rules:
-                        - If generating multiple-choice questions, provide exactly four answer choices.  
-                        - If generating true/false questions, provide only two answer choices: ["True", "False"].  
-                        - Have a roughly equal mix of each requested question type.  
-                        - Do not generate explanations—only questions, answer choices, and correct answers.
-                        - If you struggle to create ${numQuestions} generate relevant ones
-                        - If the video has an obscure reference do not bring it up in the question, questions should be relevant to the topic
-                        - You should NOT generate an example that has been gone over in the video but you shoulde create your own examples that are similar
-                        - When making the question please generate when in the video the question in seconds like "60s" or "115s", the time should be in the transcript.
-                        - Even if you generate relevant questions you should say where in the video it would help to answer these questions.
-                        - Try to keep the time it was taken from as accurate as possible 
-                        - YOU must NOT include the time in the question itself
+                            - If generating multiple-choice questions, provide exactly four answer choices.  
+                            - If generating true/false questions, provide only two answer choices: ["True", "False"].  
+                            - For multiple-choice and true/false, the 'answer' field MUST match one of the provided options exactly.  
+                            - The 'type' field MUST be one of ONLY these exact strings: "multiple-choice", "true-false", or "short-answer".  
+                            - Do NOT use variations like "true_false" or any other format.
+                            - Have a roughly equal mix of each requested question type.  
+                            - Do not generate explanations—only questions, answer choices, and correct answers.
+                            - If you struggle to create ${numQuestions} generate relevant ones.
+                            - The questions should be spread evenly throughout the entire video.
+                            - Avoid clustering all questions near the beginning — distribute them across the full video duration.
+                            - Ensure that some questions are based on early content, some from the middle, and some from the end.
+                            - If the video has an obscure reference or sponsor do not bring it up in the question, questions should be relevant to the topic.
+                            - You should NOT generate an example that has been gone over in the video but you should create your own examples that are similar.
+                            - When making the question please generate when in the video the question occurs in seconds like "60s" or "115s", the time should be from the transcript.
+                            - Even if you generate relevant questions, you must say where in the video they are useful.
+                            - You MUST carefully match each question to the exact portion of the transcript it relates to.
+                            - The 'time' field MUST be as accurate as possible to the moment in the transcript the content is discussed.
+                            - DO NOT estimate or guess the time — only assign a time if its directly connected to the transcript.
+                            - YOU must NOT include the time in the question text.
                         Return a JSON list where each question contains:
                             - 'question' (string),
                             - 'type' ('multiple-choice', 'true-false', or 'short-answer'),
-                            - THE TYPE MUST BE ('multiple-choice', 'true-false', or 'short-answer'),
+                            - THE TYPE MUST BE ('multiple-choice', 'true-false', or 'short-answer') ONLY — use this exact spelling and format,
                             - 'options' (array of choices, empty for short-answer),
-                            - 'answer' (the correct answer as a string),    
+                            - 'answer' (the correct answer as a string — MUST match one of the options for non-short-answer questions),
                             - 'time' (time in seconds as a string, e.g., "120s" for 2 minutes). 
                             - DO NOT ADD ANY ADDITIONAL PARAGRAPHS
-                        Tips for designing a good question I RECCOMEND you should follow:
-                            - Make they are clear, concise and relevant to the video
-                            - For true and false questions make false statements subtly incorrect, not obviously wrong.
-                            - Short answer questions SHOULD start with State, Describe or Explain
-                            - Ofcourse if state, describe or explain does not fit the nature of the question do not force it in for example a maths question`
+                        Tips for designing a good question I RECOMMEND you should follow:
+                            - Make sure they are clear, concise, and relevant to the video.
+                            - For true/false questions, make false statements subtly incorrect, not obviously wrong.
+                            - Short answer questions SHOULD start with State, Describe, or Explain.
+                            - Of course, if State, Describe, or Explain doesn't fit the nature of the question, do not force it in — for example, in a math question.
+                            - Each question should test understanding or application, not just recall.
+                            - Don't repeat the same wording used in the transcript word-for-word — rephrase where possible.
+                            - Use real-world or practical examples to make questions more engaging, but avoid referencing things not mentioned in the video.
+                            - Vary difficulty — include a mix of simple and more thought-provoking questions.
+                            - Do not use overly complex phrasing; keep the language age-appropriate and accessible.
+                            - If the video includes step-by-step processes, ask questions that test understanding of those steps (e.g., "What is the first step in...?")
+                            - Never create trick questions — be fair and informative.
+                            - Avoid ambiguity — make sure only one answer is clearly correct.`
                         
                     }]
                 }]
@@ -197,32 +213,31 @@ app.post('/validate-answer', async (req, res) => {
     }
 
     try {
-        const response = await axios.post(
+        const response = await axios.post(  
             `${process.env.GEMINI_API_URL}?key=${process.env.GEMINI_API_KEY}`, 
             {
                 contents: [{
                     parts: [{
-                        text: `Compare the following two responses from this question, "${question}":
+                        text: `Compare the following two responses from this question: "${question}"
                         User Answer: "${userAnswer}"
                         Correct Answer: "${correctAnswer}"
-                        
-                        If the question starts with state, the user would just need to put in a short answer
-                        If the questions starts with describe or explain the user must go a little more in depth with it
 
-                        If it doesn't start with either 3 use your own judgement.
+                        Mark the user answer as either:
+                        - "Correct!" (if their answer conveys the same meaning or key ideas)
+                        - "Incorrect!" (if it's wrong or incomplete)
 
-                        The user does NOT need to say the exact same answer even if its related enough mark it correct.
-                        If the is something question like give an example, mark the user correct if they give any correct example not just one in the correct answer.
-      
-                        If the meaning is similar and the user's response conveys the same key idea, respond with "Correct!".
-                        If the user does minor spelling mistake do not mark them wrong however if there is multiple spelling mistakes within one answer from the user YOU mark it with "Incorrect!".
-                        If the response is incorrect or missing critical details, respond with "Incorrect!".
+                        Guidelines:
+                        - If the question starts with "State", a short specific fact is sufficient.
+                        - If the question starts with "Describe" or "Explain", the user must show deeper understanding — a longer answer may be required.
+                        - For example style questions, accept any valid example — not just ones from the correct answer.
+                        - Spelling mistakes should NOT affect correctness unless they change the meaning or make the answer unreadable.
+                        - Minor differences in wording are fine as long as the meaning matches.
+                        - If the user gives a vague or partially correct answer, consider it "Incorrect!" unless it clearly covers the main idea.
 
-                        
-                        YOU MUST INCLUDE an explanations on why a user got it incorerct if you respond with "Incorrect!" 
-                        Format it like this "Your answer didn't show ect ect ect, the correct answer is"
-                        HOWEVER Do NOT include any explanations, examples, or additional text. If you respond with  "Correct!".`
-  
+                        If your response is "Incorrect!", explain briefly why the user got it wrong using this format:
+                        "Your answer didn't show [missing idea]. The correct answer is: [correct answer]"
+
+                        However, if the answer is "Correct!", do NOT add any explanation — just return "Correct!".`
                     }]
                 }]
             }, 
