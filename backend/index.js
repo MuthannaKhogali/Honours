@@ -177,10 +177,16 @@ app.get('/generate-questions', async (req, res) => {
         console.log("Sending to Gemini API...");
         const questions = await generateQuestions(transcript, parseInt(numQuestions), JSON.parse(questionTypes), userID, videoUrl);
         console.log("Questions Generated Successfully!");
+        const normalizedQuestions = JSON.parse(questions).map(q => ({
+            ...q,
+            type: q.type
+                .replace(/_/g, "-")
+                .toLowerCase()
+        }));  
         res.json({
             transcript,
-            questions
-        });
+            questions: normalizedQuestions
+        });        
     } catch (error) {
         console.error("Error in /generate-questions:", error);
         res.status(400).json({
