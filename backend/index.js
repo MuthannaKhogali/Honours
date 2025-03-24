@@ -177,16 +177,28 @@ app.get('/generate-questions', async (req, res) => {
         console.log("Sending to Gemini API...");
         const questions = await generateQuestions(transcript, parseInt(numQuestions), JSON.parse(questionTypes), userID, videoUrl);
         console.log("Questions Generated Successfully!");
-        const normalizedQuestions = JSON.parse(questions).map(q => ({
+        // Clean up any wrapping triple backticks or markdown artifacts
+        const cleanedQuestions = questions
+            .replace(/```json|```/g, '') // remove ```json and ```
+            .trim();
+        let parsedQuestions;
+        try {
+            parsedQuestions = JSON.parse(cleanedQuestions);
+        } catch (err) {
+            console.error("Failed to parse Gemini response:", cleanedQuestions);
+            return res.status(500).json({ error: "Gemini returned an invalid JSON format." });
+        }
+        // Normalize question type format
+        const normalizedQuestions = parsedQuestions.map(q => ({
             ...q,
-            type: q.type
-                .replace(/_/g, "-")
-                .toLowerCase()
-        }));  
-        res.json({
-            transcript,
-            questions: normalizedQuestions
-        });        
+            type: q.type.replace(/_/g, "-").toLowerCase()
+        }));
+
+res.json({
+    transcript,
+    questions: normalizedQuestions
+});
+     
     } catch (error) {
         console.error("Error in /generate-questions:", error);
         res.status(400).json({
