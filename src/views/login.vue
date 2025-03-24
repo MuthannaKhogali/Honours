@@ -43,7 +43,11 @@
         <!-- Switch Between Login and Register -->
         <p v-if="isSmallScreen" class="mt-3">
           {{ isRegistering ? "Already have an account?" : "Don't have an account?" }}
-          <a href="#" @click.prevent="toggleMode" class="text-link">{{ isRegistering ? 'Login Now' : 'Register Now' }}</a>
+            <a href="#" 
+              @click.prevent="toggleMode" 
+              :class="['text-link', isSmallScreen ? 'text-link-dark' : '']">
+              {{ isRegistering ? 'Login Now' : 'Register Now' }}
+            </a>
         </p>
       </form>
     </div>
@@ -133,8 +137,8 @@ html, body {
   overflow: hidden;
   margin: 0;
   padding: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
 }
 .no-scroll {
   position: fixed;
@@ -225,17 +229,16 @@ html, body {
   transform: scale(0.95);
 }
 
-/* Text Link Styling */
 .text-link {
-  color: rgb(184, 198, 255);
+  color: rgb(255, 255, 255);
   text-decoration: underline;
   cursor: pointer;
   margin-left: 5px;
   transition: color 0.3s ease-in-out;
 }
-@media (max-width: 1150px) {
-  .text-link {
-    color: rgb(110, 136, 239);
-  }
+
+.text-link-dark {
+  color: rgb(38, 0, 255); /* darker purple for white background */
 }
+
 </style>
