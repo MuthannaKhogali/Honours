@@ -27,42 +27,81 @@ app.use(express.urlencoded({
 }));
 
 
+const parseVTT = (vttContent) => {
+    const lines = vttContent.split('\n');
+    const entries = [];
+
+    let timeRegex = /(\d{2}):(\d{2}):(\d{2})\.(\d{3}) -->/;
+    let currentTime = null;
+    let currentText = [];
+
+    for (let line of lines) {
+        if (timeRegex.test(line)) {
+            const match = line.match(timeRegex);
+            if (match) {
+                const [ , hh, mm, ss ] = match;
+                const totalSeconds = parseInt(hh) * 3600 + parseInt(mm) * 60 + parseInt(ss);
+                currentTime = `${totalSeconds}s`;
+            }
+        } else if (line.trim() === '') {
+            if (currentTime && currentText.length) {
+                entries.push({
+                    time: currentTime,
+                    text: currentText.join(' ').trim()
+                });
+                currentTime = null;
+                currentText = [];
+            }
+        } else if (currentTime) {
+            currentText.push(line.trim());
+        }
+    }
+
+    if (currentTime && currentText.length) {
+        entries.push({
+            time: currentTime,
+            text: currentText.join(' ').trim()
+        });
+    }
+
+    return entries;
+};
+
 const getYouTubeTranscript = async (videoUrl) => {
     return new Promise((resolve, reject) => {
         const uniqueId = crypto.randomBytes(6).toString("hex");
-        const transcriptFile = path.resolve(__dirname, `transcript_${uniqueId}.en.vtt`); // Ensure absolute path
+        const transcriptFile = path.resolve(__dirname, `transcript_${uniqueId}.en.vtt`);
         const cookiesFile = "/home/ec2-user/youtube-cookies.txt";
-
-        console.log(` Running yt-dlp for video: ${videoUrl}`);
-        console.log(`Expected transcript file path: ${transcriptFile}`);
-        
 
         const ytDlpCommand = `yt-dlp --cookies "${cookiesFile}" --skip-download --write-auto-sub --sub-lang en --sub-format vtt -o "transcript_${uniqueId}" "${videoUrl}"`;
 
         exec(ytDlpCommand, (error, stdout, stderr) => {
             if (error) {
                 console.error(`yt-dlp error: ${error.message}`);
-                reject(new Error(`yt-dlp error: ${error.message}`));
-                return;
+                return reject(new Error(`yt-dlp error: ${error.message}`));
             }
-            console.error(`stderr: ${stderr}`);
-
-            console.log("Waiting for transcript file to be saved...");
 
             let attempts = 0;
             const checkFileExists = setInterval(() => {
                 if (fs.existsSync(transcriptFile)) {
                     clearInterval(checkFileExists);
-                    console.log(`Transcript file found: ${transcriptFile}`);
-
                     fs.readFile(transcriptFile, "utf8", (err, data) => {
                         if (err) {
-                            reject(new Error("Failed to read transcript file."));
-                            return;
+                            return reject(new Error("Failed to read transcript file."));
                         }
-
-                        resolve(data);
+                    
+                        const parsedTranscript = parseVTT(data);
+                        const formattedForGemini = parsedTranscript.map(entry => `[${entry.time}] ${entry.text}`).join('\n');
+                    
+                        // Delete the transcript after use
+                        fs.unlink(transcriptFile, (err) => {
+                            if (err) console.warn(`Could not delete ${transcriptFile}:`, err.message);
+                            else console.log(`Deleted transcript file: ${transcriptFile}`);
+                        });
+                    
+                        resolve(formattedForGemini);
                     });
+                    
                 } else if (attempts >= 20) {
                     clearInterval(checkFileExists);
                     reject(new Error(`Transcript file not found after 10 seconds: ${transcriptFile}`));
