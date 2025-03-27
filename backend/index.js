@@ -175,7 +175,7 @@ const generateQuestions = async (transcriptText, numQuestions, questionTypes, us
                             - 'options' (array of choices, empty for short-answer),
                             - 'answer' (the correct answer as a string — MUST match one of the options for non-short-answer questions),
                             - 'time' (time in seconds as a string, e.g., "120s" for 2 minutes). 
-                            - DO NOT ADD ANY ADDITIONAL PARAGRAPHS
+                            - DO NOT ADD ANY ADDITIONAL P   ARAGRAPHS
                         Tips for designing a good question I RECOMMEND you should follow:
                             - Make sure they are clear, concise, and relevant to the video.
                             - For true/false questions, make false statements subtly incorrect, not obviously wrong.
@@ -374,7 +374,7 @@ app.post("/remove-friend", removeFriend);
 app.post('/register', registerUser);
 app.post('/login', async (req, res) => {
     try {
-        console.log("Login request received:", req.body); // logs incoming requests clearly
+        console.log("Login request received"); // logs incoming requests clearly
         await loginUser(req, res);
     } catch (error) {
         console.error("Login route caught error explicitly:", error);  // logs clearly
